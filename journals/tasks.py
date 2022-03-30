@@ -44,7 +44,8 @@ app = app_module.ADSJournalsCelery('journals', proj_home=proj_home, config=globa
 logger = app.logger
 
 app.conf.CELERY_QUEUES = (
-    Queue('load-datafiles', app.exchange, routing_key='load-datafiles')
+    Queue('load-datafiles', app.exchange, routing_key='load-datafiles'),
+    Queue('load-holdings', app.exchange, routing_key='load-holdings'),
 )
 
 @app.task(queue='load-datafiles')
