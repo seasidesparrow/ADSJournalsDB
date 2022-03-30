@@ -313,7 +313,7 @@ def task_export_table_data(tablename):
 
             elif tablename == 'titlehistory':
                 csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','complete','publisherid','predecessorid','successorid','notes'))
-                results = session.query(titlehistory.statusid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
+                results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
 
             else:
                 results = []
