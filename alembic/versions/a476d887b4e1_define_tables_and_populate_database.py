@@ -213,7 +213,7 @@ def upgrade():
                     sa.Column('updated', UTCDateTime, nullable=True,
                               onupdate=get_date),
                     sa.ForeignKeyConstraint(['masterid'], ['master.masterid']),
-                    sa.PrimaryKeyConstraint('masterid', 'statusid'),
+                    sa.PrimaryKeyConstraint('masterid', 'titlehistoryid'),
                     sa.UniqueConstraint('titlehistoryid'))
 
     op.create_table('titlehistory_hist',
