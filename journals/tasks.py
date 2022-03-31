@@ -381,7 +381,7 @@ def task_checkin_table(tablename, masterdict, delete_flag=False):
                 except Exception as err:
                     raise FatalCheckinException(err)
                 else:
-                    task_setstatus(table_record.editid, status)
+                    task_setstatus(checkin['editid'], status)
 
 
             else:
