@@ -45,7 +45,6 @@ logger = app.logger
 
 app.conf.CELERY_QUEUES = (
     Queue('load-datafiles', app.exchange, routing_key='load-datafiles'),
-    Queue('load-holdings', app.exchange, routing_key='load-holdings'),
 )
 
 @app.task(queue='load-datafiles')
@@ -286,6 +285,7 @@ def task_db_load_refsource(masterid, refsource):
             logger.error("No refsource data to load!")
     return
 
+@app.task(queue='load-datafiles')
 def task_export_table_data(tablename):
     try:
         with app.session_scope() as session:
@@ -327,6 +327,7 @@ def task_export_table_data(tablename):
     else:
         return data.getvalue()
 
+@app.task(queue='load-datafiles')
 def task_checkout_table(tablename):
 
     if tablename.lower() not in app.conf.EDITABLE_TABLES:
@@ -356,6 +357,7 @@ def task_checkout_table(tablename):
         raise TableCheckoutException("Error checking out table %s: %s" % (tablename, err))
 
 
+@app.task(queue='load-datafiles')
 def task_checkin_table(tablename, masterdict, delete_flag=False):
 
     if tablename.lower() not in app.conf.EDITABLE_TABLES:
@@ -379,7 +381,7 @@ def task_checkin_table(tablename, masterdict, delete_flag=False):
                 except Exception as err:
                     raise FatalCheckinException(err)
                 else:
-                    task_setstatus(editid, status)
+                    task_setstatus(table_record.editid, status)
 
 
             else:
@@ -389,6 +391,7 @@ def task_checkin_table(tablename, masterdict, delete_flag=False):
         raise TableCheckinException("Error checking in table %s: %s" % (tablename, err))
 
 
+@app.task(queue='load-datafiles')
 def task_update_table(checkin, masterdict):
     try:
         tablename = checkin['tablename']
