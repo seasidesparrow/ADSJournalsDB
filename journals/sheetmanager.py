@@ -81,7 +81,7 @@ class SpreadsheetManager(object):
 
     def fetch_table(self):
         try:
-            raw_from_google = self.sheet.sheet1.get_all_records()
+            raw_from_google = self.sheet.sheet1.get_all_records(value_render_option='UNFORMATTED_VALUE', numericise_ignore=['all'])
             checkin_data = [xform_google(r) for r in raw_from_google]
             return checkin_data
         except Exception as err:
