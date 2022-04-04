@@ -163,12 +163,11 @@ def task_db_load_publisher(recs):
         if recs:
             for r in recs:
                 try:
-                    session.add(publisher(masterid=r[0], pubname=r[1],
-                                                  puburl=r[2]))
+                    session.add(publisher(pubname=r))
                     session.commit()
                 except Exception as err:
-                    logger.debug("Duplicate XREF ident skipped: %s,%s" %
-                                (r[0], r[1]))
+                    logger.debug("Problem loading publisher: %s,%s" %
+                                (r, err))
                     session.rollback()
                     session.flush()
         else:

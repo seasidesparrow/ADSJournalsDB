@@ -96,6 +96,10 @@ class ReadBibstemException(Exception):
     pass
 
 
+class ReadCompletenessException(Exception):
+    pass
+
+
 class ReadCanonicalException(Exception):
     pass
 
