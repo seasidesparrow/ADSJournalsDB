@@ -14,45 +14,6 @@ proj_home = os.path.realpath(os.path.dirname(__file__)+ '/../')
 config = load_config(proj_home=proj_home)
 
 
-def parse_bibcodes(bibcode):
-    parsed_bib = {}
-    if not isinstance(bibcode, str):
-        pass
-    else:
-        try:
-            year = bibcode[0:4]
-            stem = bibcode[4:9]
-            volm = bibcode[9:13]
-            qual = bibcode[13]
-            page = bibcode[14:18]
-            auth = bibcode[18]
-            if volm in config.get('BIBSTEM_VOLUMES'):
-                stem = year + stem + volm
-                volm = None
-            parsed_bib = {"bibcode": bibcode, "year": year, "bibstem": stem,
-                          "volume": volm, "qualifier": qual, "page": page,
-                          "initial": auth}
-        except Exception as err:
-            # logger.warn("Nonstandard bibcode: {0}".format(bibcode))
-            pass
-    return parsed_bib
-
-
-def return_query(url, method='get', data='', headers='', verify=False):
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    try:
-        if method.lower() == 'get':
-            rQuery = requests.get(url)
-        elif method.lower() == 'post':
-            rQuery = requests.post(url, data=data, headers=headers, verify=False)
-        if rQuery.status_code != 200:
-            raise RequestsException('Return code error: %s' % rQuery.status_code)
-        else:
-            return rQuery.json()
-    except Exception as err:
-        raise RequestsException('Error in return_query: %s' % err)
-
-
 def get_encoding(filename):
     try:
         encoding = chardet.detect(open(filename, 'rb').read())['encoding']
@@ -78,6 +39,7 @@ def read_bibstems_list():
     except Exception as err:
         raise ReadBibstemException(err)
     return data
+
 
 def export_to_bibstemsdat(rows):
     infile = config.get('BIBSTEMS_FILE')
@@ -129,6 +91,7 @@ def read_abbreviations_list():
         pass
     return datadict
 
+
 def read_issn_file():
     issn_dict = {}
     try:
@@ -147,48 +110,35 @@ def read_issn_file():
         print("Error in read_issn_file: %s" % err)
     return issn_dict
 
+
 def read_complete_csvs():
     data = {}
     for coll in config.get('COLLECTIONS'):
         infile = config.get('JDB_DATA_DIR') + 'completion.' + coll + '.csv'
         try:
             with open(infile, 'r', encoding=get_encoding(infile)) as f:
-                f.readline()
-                f.readline()
-                for l in f.readlines():
+                csvreader = csv.reader(f, delimiter='|')
+                for l in csvreader:
                     try:
-                        (journal, bibstem, issn, xref, startyear, startvol,
-                         endvol, complete, complete_origin, publisher, scanned,
-                         online, url, notes) = l.strip().split('|')
+                        bibstem = l[1]
+                        if bibstem not in data.keys() and bibstem not in ['Bibstem', '']:
+                            data[bibstem] = {'issn': l[2],
+                                             'xref': l[3],
+                                             'startyear': l[4],
+                                             'startvol': l[5],
+                                             'endvol': l[6],
+                                             'complete': l[7],
+                                             'comporig': l[8],
+                                             'publisher': l[9],
+                                             'scanned': l[10],
+                                             'online': l[11],
+                                             'url': l[12],
+                                             'notes': l[13]}
                     except Exception as err:
-                        print("Unparseable csv: {0}".format(l.strip()))
+                        # print("warning: skipped line in %s -- %s: %s" % (coll, bibstem, err))
                         pass
-                    else:
-                        if bibstem in data:
-                            # logger.info("skipping duplicate bibstem: %s" %
-                            #             bibstem)
-                            pass
-                        else:
-                            for a in [complete, scanned, online]:
-                                if (a != '' and (a[0] == 'Y' or a[0] == 'y')):
-                                    a = True
-                                else:
-                                    a = False
-                            data[bibstem] = {u'issn': issn,
-                                             u'xref': xref,
-                                             u'startyear': startyear,
-                                             u'startvol': startvol,
-                                             u'endvol': endvol,
-                                             u'complete': complete,
-                                             u'comporig': complete_origin,
-                                             u'publisher': publisher,
-                                             u'scanned': scanned,
-                                             u'online': online,
-                                             u'url': url,
-                                             u'notes': notes}
         except Exception as err:
-            # logger.warn('Cant load collection {0}:'.format(coll))
-            pass
+            raise ReadCompletenessException(err)
     return data
 
 
@@ -245,7 +195,7 @@ def read_raster_xml(masterdict):
                     data = fx.read().rstrip()
                     soup = bs(data, 'html5lib')
                     pub = soup.find('publication')
-    
+
                     # get volume specific parameters
                     volumes = list()
                     try:
@@ -253,7 +203,7 @@ def read_raster_xml(masterdict):
                     except Exception as err:
                         print('utils.read_raster_xml got no volumes! %s' % err)
                         pass
-    
+
                     # now make a dict of the general params
                     try:
                         global_param = parse_raster_pub_data(pub)
@@ -274,6 +224,7 @@ def read_raster_xml(masterdict):
 
     return recs
 
+
 def parse_refsource_str(srcstr):
     try:
         src = srcstr.split('/')
@@ -292,6 +243,7 @@ def parse_refsource_str(srcstr):
         print('Error in parse_refsource_str: %s' % err)
         return
 
+
 def update_refsources(refsources, bibstem, year, volume, source):
     try:
         rs = refsources[bibstem]
@@ -309,6 +261,7 @@ def update_refsources(refsources, bibstem, year, volume, source):
         except Exception as err:
             print('update existing failed: %s' % err)
     return refsources
+
 
 def create_refsource():
     '''

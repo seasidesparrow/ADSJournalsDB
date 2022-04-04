@@ -182,7 +182,7 @@ def load_completeness(masterdict):
                 if value['xref'] != '':
                     recsx.append((mid, value['xref']))
                 if value['publisher'] != '':
-                    recsp.append((mid, value['publisher'], value['url']))
+                    recsp.append(value['publisher'])
 
             else:
                 logger.debug("No mid for bibstem %s", key)
