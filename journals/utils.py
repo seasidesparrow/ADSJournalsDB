@@ -1,5 +1,6 @@
 from __future__ import print_function
 import chardet
+import csv
 import os
 import requests
 import string
@@ -115,30 +116,31 @@ def read_complete_csvs():
     data = {}
     for coll in config.get('COLLECTIONS'):
         infile = config.get('JDB_DATA_DIR') + 'completion.' + coll + '.csv'
-        try:
-            with open(infile, 'r', encoding=get_encoding(infile)) as f:
-                csvreader = csv.reader(f, delimiter='|')
-                for l in csvreader:
-                    try:
-                        bibstem = l[1]
-                        if bibstem not in data.keys() and bibstem not in ['Bibstem', '']:
-                            data[bibstem] = {'issn': l[2],
-                                             'xref': l[3],
-                                             'startyear': l[4],
-                                             'startvol': l[5],
-                                             'endvol': l[6],
-                                             'complete': l[7],
-                                             'comporig': l[8],
-                                             'publisher': l[9],
-                                             'scanned': l[10],
-                                             'online': l[11],
-                                             'url': l[12],
-                                             'notes': l[13]}
-                    except Exception as err:
-                        # print("warning: skipped line in %s -- %s: %s" % (coll, bibstem, err))
-                        pass
-        except Exception as err:
-            raise ReadCompletenessException(err)
+        if os.path.exists(infile):
+            try:
+                with open(infile, 'r', encoding=get_encoding(infile)) as f:
+                    csvreader = csv.reader(f, delimiter='|')
+                    for l in csvreader:
+                        try:
+                            bibstem = l[1]
+                            if bibstem not in data.keys() and bibstem not in ['Bibstem', '']:
+                                data[bibstem] = {'issn': l[2],
+                                                 'xref': l[3],
+                                                 'startyear': l[4],
+                                                 'startvol': l[5],
+                                                 'endvol': l[6],
+                                                 'complete': l[7],
+                                                 'comporig': l[8],
+                                                 'publisher': l[9],
+                                                 'scanned': l[10],
+                                                 'online': l[11],
+                                                 'url': l[12],
+                                                 'notes': l[13]}
+                        except Exception as err:
+                            # print("warning: skipped line in %s -- %s: %s" % (coll, bibstem, err))
+                            pass
+            except Exception as err:
+                raise ReadCompletenessException(err)
     return data
 
 
