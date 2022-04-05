@@ -24,41 +24,17 @@ def get_arguments():
 
     parser = argparse.ArgumentParser(description='Command line options.')
 
-    parser.add_argument('-lm',
-                        '--load-master',
-                        dest='load_master',
+    parser.add_argument('-lf',
+                        '--load-full',
+                        dest='load_full',
                         action='store_true',
-                        help='Load master list of bibstems')
+                        help='Load all files from text / classic')
 
-    parser.add_argument('-la',
-                        '--load-abbrevs',
-                        dest='load_abbrevs',
+    parser.add_argument('-dc',
+                        '--dump-classic-files',
+                        dest='dump_classic',
                         action='store_true',
-                        help='Load list of journal name abbreviations')
-
-    parser.add_argument('-lc',
-                        '--load-completeness',
-                        dest='load_compl',
-                        action='store_true',
-                        help='Load completeness .csv files')
-
-    parser.add_argument('-li',
-                        '--load-issn',
-                        dest='load_issn',
-                        action='store_true',
-                        help='Load journal_issn')
-
-    parser.add_argument('-lr',
-                        '--load-rasterconf',
-                        dest='load_raster',
-                        action='store_true',
-                        help='Load rasterization control parameters')
-
-    parser.add_argument('-ls',
-                        '--load-refsources',
-                        dest='load_refsources',
-                        action='store_true',
-                        help='Load refsources from citing2file.dat')
+                        help='Dump table data to files used for classic')
 
     parser.add_argument('-xi',
                         '--checkin-table',
@@ -74,12 +50,6 @@ def get_arguments():
                         default=None,
                         help='Check OUT table TABLE to GSheets')
 
-    parser.add_argument('-db',
-                        '--dump-bibstems',
-                        dest='dump_bibstems',
-                        action='store_true',
-                        help='Dump master to bibstems.dat.NEW')
-
     parser.add_argument('-xd',
                         '--delete-checkin-sheet',
                         dest='delete_flag',
@@ -91,7 +61,7 @@ def get_arguments():
     return args
 
 
-def load_master_table():
+def load_master():
     '''
     No.
     '''
@@ -162,39 +132,42 @@ def load_completeness(masterdict):
     No.
     '''
     pub_dict = utils.read_complete_csvs()
-    recsi = []
-    recsx = []
     recsp = []
     for key, value in list(pub_dict.items()):
-        try:
-            if key in masterdict:
-                logger.debug("Got masterid for bibstem %s", key)
-                mid = masterdict[key]
-                c = value['startyear']
-                d = value['startvol']
-                e = value['endvol']
-                f = value['complete']
-                g = value['comporig']
-                i = value['scanned']
-                j = value['online']
-                if value['issn'] != '':
-                    recsi.append((mid, value['issn']))
-                if value['xref'] != '':
-                    recsx.append((mid, value['xref']))
-                if value['publisher'] != '':
-                    recsp.append(value['publisher'])
+        if value['publisher']:
+            recsp.append(value['publisher'])
+    if recsp:
+        recsp = list(set(recsp))
+        recsp.sort()
+        tasks.task_db_load_publisher(recsp)
 
-            else:
-                logger.debug("No mid for bibstem %s", key)
-        except Exception as err:
-            logger.warning("Error with bibstem %s", key)
-            logger.warning("Error: %s", err)
+    recsi = []
+    recsx = []
+    try:
+        if key in masterdict:
+            logger.debug("Got masterid for bibstem %s", key)
+            mid = masterdict[key]
+            c = value['startyear']
+            d = value['startvol']
+            e = value['endvol']
+            f = value['complete']
+            g = value['comporig']
+            i = value['scanned']
+            j = value['online']
+            if value['issn'] != '':
+                recsi.append((mid, value['issn']))
+            if value['xref'] != '':
+                recsx.append((mid, value['xref']))
+
+        else:
+            logger.debug("No mid for bibstem %s", key)
+    except Exception as err:
+        logger.warning("Error with bibstem %s", key)
+        logger.warning("Error: %s", err)
     if recsi:
         tasks.task_db_load_issn(recsi)
     if recsx:
         tasks.task_db_load_xref(recsx)
-    if recsp:
-        tasks.task_db_load_publisher(recsp)
     return
 
 
@@ -244,23 +217,43 @@ def load_issn(masterdict):
 
 def checkin_table(tablename, masterdict, delete_flag):
     try:
-        result = tasks.task_checkin_table(tablename, masterdict, delete_flag=delete_flag)
+        tasks.task_checkin_table(tablename, masterdict, delete_flag=delete_flag)
     except Exception as err:
-        logger.warning("Unable to checkin table %s: %s" % (tablename, err))
+        logger.error("Unable to checkin table %s: %s" % (tablename, err))
         return
     else:
         logger.warning("Table %s successfully checked in from Sheets" % tablename)
-        return result
+
 
 def checkout_table(tablename):
     try:
-        result = tasks.task_checkout_table(tablename)
+        tasks.task_checkout_table(tablename)
     except Exception as err:
         logger.warning("Unable to checkout table %s: %s" % (tablename, err))
-        return
     else:
         logger.warning("Table %s is available in Sheets" % tablename)
-        return result
+
+
+def load_full_database(args):
+    # This is used to create a database from scratch from all
+    # input files: master, abbreviations, completeness (publisher, ids), raster,
+    # refsources.
+
+    try:
+        load_master_table()
+        masterdict = tasks.task_db_get_bibstem_masterid()
+        logger.debug("masterdict has %s records", len(masterdict))
+    except Exception as err:
+        logger.warning("Error loading master table: %s" % err)
+    else:
+        try:
+            load_completeness(masterdict)
+            load_abbreviations(masterdict)
+            load_rasterconfig(masterdict)
+            load_refsources(masterdict)
+        except Exception as err:
+            logger.warning("Error loading auxilliary tables: %s" % err)
+
 
 def main():
     '''
@@ -269,46 +262,21 @@ def main():
 
     args = get_arguments()
 
-    # if args.load_master == True:
-    # create the set of bibcode-journal name pairs and assign them UIDs;
-    # these UIDs will be used as foreign keys in all other tables, so
-    # if this fails, you're dead in the water.
-    if args.load_master:
-        load_master_table()
-
-    # none of the other loaders will work unless you have data in
-    # journals.master, so try to load it
-    try:
-        masterdict = tasks.task_db_get_bibstem_masterid()
-        logger.debug("masterdict has %s records", len(masterdict))
-    except Exception as err:
-        logger.warning("Error reading master table bibstem-masterid mapping: %s", err)
+    if args.load_full:
+        load_full_database()
     else:
-        # load bibstem-journal name abbreviation pairs
-        if args.load_abbrevs:
-            load_abbreviations(masterdict)
-
-        if args.load_compl:
-            # completeness data
-            load_completeness(masterdict)
-
-        if args.load_raster:
-            load_rasterconfig(masterdict)
-
-        if args.load_refsources:
-            load_refsources(masterdict)
-
-        if args.load_issn:
-            load_issn(masterdict)
-
         if args.checkin_table:
-            result = checkin_table(args.checkin_table, masterdict, args.delete_flag)
+            try:
+                masterdict = tasks.task_db_get_bibstem_masterid()
+                checkin_table(args.checkin_table, masterdict, args.delete_flag)
+            except Exception as err:
+                logger.warning("Error checking in table %s: %s" % (args.checkin_table, err))
         
-    if args.checkout_table:
-        result = checkout_table(args.checkout_table)
+        if args.checkout_table:
+            checkout_table(args.checkout_table)
 
-    if args.dump_bibstems:
-        tasks.task_export_master_to_bibstems()
+        if args.dump_classic:
+            tasks.task_export_classic_files()
 
 
 if __name__ == '__main__':
