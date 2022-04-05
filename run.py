@@ -234,13 +234,13 @@ def checkout_table(tablename):
         logger.warning("Table %s is available in Sheets" % tablename)
 
 
-def load_full_database(args):
+def load_full_database():
     # This is used to create a database from scratch from all
     # input files: master, abbreviations, completeness (publisher, ids), raster,
     # refsources.
 
     try:
-        load_master_table()
+        load_master()
         masterdict = tasks.task_db_get_bibstem_masterid()
         logger.debug("masterdict has %s records", len(masterdict))
     except Exception as err:
