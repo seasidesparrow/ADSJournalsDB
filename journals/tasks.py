@@ -47,6 +47,7 @@ app.conf.CELERY_QUEUES = (
     Queue('load-datafiles', app.exchange, routing_key='load-datafiles'),
 )
 
+
 @app.task(queue='load-datafiles')
 def task_setstatus(idno, status_msg):
     with app.session_scope() as session:
@@ -88,8 +89,9 @@ def task_db_bibstems_to_master(recs):
                 logger.error("Problem with database commit: %s", err)
                 raise DBCommitException("Could not commit to db, stopping now.")
 
+
 @app.task(queue='load-datafiles')
-def task_export_master_to_bibstems():
+def task_export_classic_files():
     with app.session_scope() as session:
         result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.masterid.asc()).all()
         rows = []
@@ -100,7 +102,6 @@ def task_export_master_to_bibstems():
             export_to_bibstemsdat(rows)
         except Exception as err:
             logger.error("Problem exporting master to bibstems.dat: %s" % err)
-
 
 
 @app.task(queue='load-datafiles')
