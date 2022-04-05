@@ -121,42 +121,45 @@ def task_db_load_abbrevs(recs):
 
 
 @app.task(queue='load-datafiles')
-def task_db_load_issn(recs):
+def task_db_load_identifier(recs, idtype='ISSN_print'):
     with app.session_scope() as session:
         if recs:
             for r in recs:
                 try:
                     session.add(idents(masterid=r[0],
-                                                    id_type='ISSN',
-                                                    id_value=r[1]))
+                                       id_type=idtype,
+                                       id_value=r[1]))
                     session.commit()
                 except Exception as err:
-                    logger.debug("Duplicate ISSN ident skipped: %s,%s" %
-                                (r[0], r[1]))
+                    logger.debug("Duplicate %s skipped: %s,%s" %
+                                (idtype, r[0], r[1]))
                     session.rollback()
                     session.flush()
         else:
-            logger.info("There were no ISSNs to load!")
+            logger.info("No %s loaded!" % idtype)
 
 
 @app.task(queue='load-datafiles')
-def task_db_load_xref(recs):
+def task_db_load_titlehist(recs):
     with app.session_scope() as session:
         if recs:
             for r in recs:
                 try:
-                    session.add(idents(masterid=r[0],
-                                                    id_type='CROSSREF',
-                                                    id_value=r[1]))
+                    session.add(titlehistory(masterid=r[0],
+                                             year_start=r[1],
+                                             vol_start=r[2],
+                                             vol_end=r[3],
+                                             complete=r[4],
+                                             publisherid=r[5],
+                                             notes=r[6]))
                     session.commit()
                 except Exception as err:
-                    logger.debug("Duplicate XREF ident skipped: %s,%s" %
-                                (r[0], r[1]))
+                    logger.debug("Problem loading titlehistory: %s,%s" %
+                                (r, err))
                     session.rollback()
                     session.flush()
         else:
-            logger.info("There were no XREF IDs to load!")
-
+            logger.info("No titlehistory loaded.")
 
 @app.task(queue='load-datafiles')
 def task_db_load_publisher(recs):
@@ -167,8 +170,7 @@ def task_db_load_publisher(recs):
                     session.add(publisher(pubname=r))
                     session.commit()
                 except Exception as err:
-                    logger.debug("Problem loading publisher: %s,%s" %
-                                (r, err))
+                    logger.debug("Problem loading publisher: %s,%s" % (r, err))
                     session.rollback()
                     session.flush()
         else:
@@ -262,8 +264,22 @@ def task_db_get_bibstem_masterid():
                                         master.bibstem):
                 dictionary[record.bibstem] = record.masterid
         except Exception as err:
-            logger.error("Error: failed to read bibstem-masterid dict from table master")
-            raise DBReadException("Could not read from database!")
+            logger.error("Failed to read bibstem-masterid dict from table master: %s" % err)
+            raise DBReadException("Could not read from master: %s" % err)
+    return dictionary
+
+
+@app.task(queue='load-datafiles')
+def task_db_get_publisherid():
+    dictionary = {}
+    with app.session_scope() as session:
+        try:
+            for record in session.query(publisher.publisherid,
+                                        publisher.pubname):
+                dictionary[publisher.pubname] = publisher.publisherid
+        except Exception as err:
+            logger.error("Failed to read publisher-publisherid dict from table publisher")
+            raise DBReadException("Could not read from publisher: %s" % err)
     return dictionary
 
 
@@ -313,8 +329,8 @@ def task_export_table_data(tablename):
                 results = session.query(publisher.publisherid, publisher.pubname, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.notes).order_by(publisher.publisherid.asc()).all()
 
             elif tablename == 'titlehistory':
-                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','complete','publisherid','predecessorid','successorid','notes'))
-                results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
+                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','complete','publisherid','predecessorid','successorid','notes'))
+                results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
 
             else:
                 results = []

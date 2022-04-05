@@ -129,46 +129,47 @@ def load_abbreviations(masterdict):
 
 def load_completeness(masterdict):
     '''
-    No.
+    Completeness loads multiple tables: publisher, idents, status
     '''
     pub_dict = utils.read_complete_csvs()
     recsp = []
     for key, value in list(pub_dict.items()):
-        if value['publisher']:
+        if value.get('publisher', None):
             recsp.append(value['publisher'])
     if recsp:
         recsp = list(set(recsp))
         recsp.sort()
         tasks.task_db_load_publisher(recsp)
+    publisherdict = tasks.task_db_get_publisherid()
 
     recsi = []
     recsx = []
-    try:
-        if key in masterdict:
-            logger.debug("Got masterid for bibstem %s", key)
-            mid = masterdict[key]
-            c = value['startyear']
-            d = value['startvol']
-            e = value['endvol']
-            f = value['complete']
-            g = value['comporig']
-            i = value['scanned']
-            j = value['online']
-            if value['issn'] != '':
-                recsi.append((mid, value['issn']))
-            if value['xref'] != '':
-                recsx.append((mid, value['xref']))
-
-        else:
-            logger.debug("No mid for bibstem %s", key)
-    except Exception as err:
-        logger.warning("Error with bibstem %s", key)
-        logger.warning("Error: %s", err)
+    for key, value in list(pub_dict.items()):
+        mid = masterdict[key]
+        if value.get('issn', None):
+            recsi.append((mid, value['issn']))
+        if value.get('xref', None):
+            recsx.append((mid, value['xref']))
     if recsi:
-        tasks.task_db_load_issn(recsi)
+        tasks.task_db_load_identifier(recsi, idtype='ISSN_print')
     if recsx:
-        tasks.task_db_load_xref(recsx)
-    return
+        tasks.task_db_load_identifier(recsx, idtype='Crossref')
+        
+    recsh = []
+    for key, value in list(pub_dict.items()):
+        if key in masterdict:
+            mid = masterdict[key]
+            pub = value.get('publisher', None)
+            pid = publisherdict.get(pub, None)
+            year_start = value.get('startyear', None)
+            vol_start = value.get('startvol', None)
+            vol_end = value.get('endvol', None)
+            complete = value.get('complete', None)
+            url = value.get('url', None)
+            notes = '; '.join([value.get('notes', None), url])
+            recsh.append((mid,year_start,vol_start,vol_end,complete,pid,notes))
+    if recsh:
+        tasks.task_db_load_titlehist(recsh)
 
 
 def load_refsources(masterdict):
@@ -234,13 +235,13 @@ def checkout_table(tablename):
         logger.warning("Table %s is available in Sheets" % tablename)
 
 
-def load_full_database(args):
+def load_full_database():
     # This is used to create a database from scratch from all
     # input files: master, abbreviations, completeness (publisher, ids), raster,
     # refsources.
 
     try:
-        load_master_table()
+        load_master()
         masterdict = tasks.task_db_get_bibstem_masterid()
         logger.debug("masterdict has %s records", len(masterdict))
     except Exception as err:

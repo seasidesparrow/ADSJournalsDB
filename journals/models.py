@@ -259,10 +259,12 @@ class JournalsTitleHistory(Base):
                       primary_key=True, nullable=False)
     year_start = Column(Integer)
     year_end = Column(Integer)
+    vol_start = Column(String)
+    vol_end = Column(String)
     complete = Column(Text)
     publisherid = Column(Integer, ForeignKey('publisher.publisherid'))
     successor_masterid = Column(Integer)
-    notes = Column(String)
+    notes = Column(Text)
     created = Column(UTCDateTime, default=get_date)
     updated = Column(UTCDateTime, onupdate=get_date)
 
@@ -274,6 +276,8 @@ class JournalsTitleHistory(Base):
                 'masterid': self.masterid,
                 'year_start': self.year_start,
                 'year_end': self.year_end,
+                'vol_start': self.vol_start,
+                'vol_end': self.vol_end,
                 'complete': self.complete,
                 'publisherid': self.publisherid,
                 'successor_masterid': self.successor_masterid,
@@ -291,10 +295,12 @@ class JournalsTitleHistoryHistory(Base):
     masterid = Column(Integer)
     year_start = Column(Integer)
     year_end = Column(Integer)
+    vol_start = Column(String)
+    vol_end = Column(String)
     complete = Column(Text)
     publisherid = Column(Integer)
     successor_masterid = Column(Integer)
-    notes = Column(String)
+    notes = Column(Text)
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
