@@ -177,7 +177,6 @@ def load_refsources(masterdict):
     refsources = utils.create_refsource()
     missing_stems = []
     loaded_stems = []
-    print('refsources: %s' % refsources)
 
     if refsources:
         for bibstem, refsource in refsources.items():
@@ -203,8 +202,7 @@ def load_issn(masterdict):
                 mid = masterdict[k]
                 recsif.append((mid, v))
             except Exception as noop:
-                # print("bibstem %s is not in masterdict, skipping" % k)
-                pass
+                logger.debug("bibstem %s is not in masterdict, skipping" % k)
         if len(recsi) != len(issn_dict.keys()):
             logger.warning("Lines were skipped when reading ISSNs from file")
         if recsi:

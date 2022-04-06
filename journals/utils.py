@@ -15,6 +15,30 @@ proj_home = os.path.realpath(os.path.dirname(__file__)+ '/../')
 config = load_config(proj_home=proj_home)
 
 
+def parse_bibcodes(bibcode):
+    parsed_bib = {}
+    if not isinstance(bibcode, str):
+        pass
+    else:
+        try:
+            year = bibcode[0:4]
+            stem = bibcode[4:9]
+            volm = bibcode[9:13]
+            qual = bibcode[13]
+            page = bibcode[14:18]
+            auth = bibcode[18]
+            if volm in config.get('BIBSTEM_VOLUMES'):
+                stem = year + stem + volm
+                volm = None
+            parsed_bib = {"bibcode": bibcode, "year": year, "bibstem": stem,
+                          "volume": volm, "qualifier": qual, "page": page,
+                          "initial": auth}
+        except Exception as err:
+            # logger.warn("Nonstandard bibcode: {0}".format(bibcode))
+            pass
+    return parsed_bib
+
+
 def get_encoding(filename):
     try:
         encoding = chardet.detect(open(filename, 'rb').read())['encoding']
@@ -103,12 +127,14 @@ def read_issn_file():
                 try:
                     (bibstem, issn, pubname) = l.strip().split('\t')
                 except Exception as err:
-                    print("Unparseable csv: {0}".format(l.strip()))
+                    # logger.warn("Unparseable csv: {0}".format(l.strip()))
+                    pass
                 else:
                     bibstem = bibstem.rstrip('.')
                     issn_dict[bibstem] = issn
     except Exception as err:
-        print("Error in read_issn_file: %s" % err)
+        # logger.error("Error in read_issn_file: %s" % err)
+        pass
     return issn_dict
 
 
@@ -137,7 +163,7 @@ def read_complete_csvs():
                                                  'url': l[12],
                                                  'notes': l[13]}
                         except Exception as err:
-                            # print("warning: skipped line in %s -- %s: %s" % (coll, bibstem, err))
+                            # logger.warning("CSV file: skipped line in %s -- %s: %s" % (coll, bibstem, err))
                             pass
             except Exception as err:
                 raise ReadCompletenessException(err)
@@ -159,7 +185,6 @@ def parse_raster_volume_data(pubsoup):
                             del vol_param[t.name]
                     except Exception as err:
                         pass
-                        # print(('volumening problem:', err))
             if vol_param:
                 vol_range['range'] = v['range']
                 vol_range['param'] = vol_param
@@ -203,7 +228,7 @@ def read_raster_xml(masterdict):
                     try:
                         volumes = parse_raster_volume_data(pub)
                     except Exception as err:
-                        print('utils.read_raster_xml got no volumes! %s' % err)
+                        # logger.debug('utils.read_raster_xml got no volumes! %s' % err)
                         pass
 
                     # now make a dict of the general params
@@ -242,7 +267,7 @@ def parse_refsource_str(srcstr):
             s = 'PUBLISHER'
         return s
     except Exception as err:
-        print('Error in parse_refsource_str: %s' % err)
+        # logger.debug('Error in parse_refsource_str: %s' % err)
         return
 
 
@@ -253,7 +278,8 @@ def update_refsources(refsources, bibstem, year, volume, source):
         try:
             rs = RefSource(bibstem=bibstem, volume=volume, year=year, source=source)
         except Exception as err:
-            print('create new failed: %s' % err)
+            # logger.debug('create new failed: %s' % err)
+            pass
         else:
             refsources[bibstem] = rs
     else:
@@ -261,7 +287,8 @@ def update_refsources(refsources, bibstem, year, volume, source):
             rs.increment_source(volume, year, source)
             refsources[bibstem] = rs
         except Exception as err:
-            print('update existing failed: %s' % err)
+            # logger.debug('update existing failed: %s' % err)
+            pass
     return refsources
 
 
@@ -289,14 +316,12 @@ def create_refsource():
     '''
     refsources = {}
     infile = config.get('BIB_TO_REFS_FILE')
-    iloaded = 0
     with open(infile, 'r') as fin:
         for l in fin.readlines():
-            iloaded += 1
             try:
                 (bibcode, srcfile) = l.strip().split('\t')
             except Exception as err:
-                print('Malformed line in source file: "%s"' % l.strip())
+                # logger.debug('Malformed line in source file: "%s"' % l.strip())
                 pass
             else:
                 try:
@@ -307,9 +332,8 @@ def create_refsource():
                     source = parse_refsource_str(srcfile)
                     refsources = update_refsources(refsources, bibstem, year, volume, source)
                 except Exception as err:
-                    print('failed update_refsources: %s' % err)
+                    # logger.debug('failed update_refsources: %s' % err)
                     pass
-    print('haha i just read %s lines...' % iloaded)
     return refsources
 
 
