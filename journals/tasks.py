@@ -26,7 +26,7 @@ from journals.models import JournalsEditControl as editctrl
 from journals.utils import *
 from journals.exceptions import *
 from journals.sheetmanager import SpreadsheetManager
-import journals.refsource as refsource
+import journals.refsource as refsrc
 
 TABLES = {'master': master, 'master_hist': master_hist,
           'names': names, 'names_hist': names_hist,
@@ -284,16 +284,16 @@ def task_db_get_publisherid():
 
 
 @app.task(queue='load-datafiles')
-def task_db_load_refsource(masterid, refsource):
+def task_db_load_refsource(masterid, refsrc):
     with app.session_scope() as session:
-        if masterid and refsource:
+        if masterid and refsrc:
             try:
-                refsource = json.dumps(refsource.toJSON())
+                refsrc = json.dumps(refsrc.toJSON())
                 session.add(refsource(masterid=masterid,
-                                              refsource_list=refsource))
+                                              refsource_list=refsrc))
                 session.commit()
             except Exception as err:
-                logger.debug("Error adding refsources for %s: %s" %
+                logger.warning("Error adding refsources for %s: %s" %
                                (masterid, err))
                 session.rollback()
                 session.commit()
