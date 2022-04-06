@@ -289,13 +289,15 @@ def create_refsource():
     '''
     refsources = {}
     infile = config.get('BIB_TO_REFS_FILE')
+    iloaded = 0
     with open(infile, 'r') as fin:
         for l in fin.readlines():
+            iloaded += 1
             try:
                 (bibcode, srcfile) = l.strip().split('\t')
             except Exception as err:
+                print('Malformed line in source file: "%s"' % l.strip())
                 pass
-                # print('Malformed line in source file: "%s"' % l.strip())
             else:
                 try:
                     parsed_bib = parse_bibcodes(bibcode)
@@ -305,8 +307,9 @@ def create_refsource():
                     source = parse_refsource_str(srcfile)
                     refsources = update_refsources(refsources, bibstem, year, volume, source)
                 except Exception as err:
+                    print('failed update_refsources: %s' % err)
                     pass
-                    # print('failed update_refsources: %s' % err)
+    print('haha i just read %s lines...' % iloaded)
     return refsources
 
 
