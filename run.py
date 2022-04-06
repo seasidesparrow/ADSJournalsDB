@@ -145,11 +145,12 @@ def load_completeness(masterdict):
     recsi = []
     recsx = []
     for key, value in list(pub_dict.items()):
-        mid = masterdict[key]
-        if value.get('issn', None):
-            recsi.append((mid, value['issn']))
-        if value.get('xref', None):
-            recsx.append((mid, value['xref']))
+        if key in masterdict:
+            mid = masterdict[key]
+            if value.get('issn', None):
+                recsi.append((mid, value['issn']))
+            if value.get('xref', None):
+                recsx.append((mid, value['xref']))
     if recsi:
         tasks.task_db_load_identifier(recsi, idtype='ISSN_print')
     if recsx:
@@ -176,9 +177,9 @@ def load_refsources(masterdict):
     refsources = utils.create_refsource()
     missing_stems = []
     loaded_stems = []
+    print('refsources: %s' % refsources)
 
     if refsources:
-
         for bibstem, refsource in refsources.items():
             try:
                 bibstem = bibstem.rstrip('.')
@@ -191,8 +192,6 @@ def load_refsources(masterdict):
                 loaded_stems.append(bibstem)
 
         logger.debug("Loaded bibstems: %s\tMissing bibstems: %s" % (len(loaded_stems), len(missing_stems)))
-
-    return
 
 
 def load_issn(masterdict):
