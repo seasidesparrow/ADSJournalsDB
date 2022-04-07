@@ -329,7 +329,7 @@ def task_export_table_data(tablename):
                 results = session.query(publisher.publisherid, publisher.pubname, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.notes).order_by(publisher.publisherid.asc()).all()
 
             elif tablename == 'titlehistory':
-                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','complete','publisherid','predecessorid','successorid','notes'))
+                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','complete','publisherid','successor_masterid','notes'))
                 results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
 
             else:
