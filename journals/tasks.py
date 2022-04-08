@@ -47,6 +47,16 @@ app.conf.CELERY_QUEUES = (
     Queue('load-datafiles', app.exchange, routing_key='load-datafiles'),
 )
 
+def is_type_conversion(newval, oldval):
+    if newval != oldval:
+        try:
+            if str(newval) == oldval or int(newval) == oldval:
+                return True
+        except Exception as noop:
+            pass
+        return False
+    else:
+        return True
 
 @app.task(queue='load-datafiles')
 def task_setstatus(idno, status_msg):
@@ -436,8 +446,11 @@ def task_update_table(checkin, masterdict):
                         for k,v in row.items():
                             try:
                                 if k != tk and v != getattr(r,k):
-                                    update += 1
-                                    setattr(r,k,v)
+                                    # do a quick check to see if the difference
+                                    # is due to str(v) != int(v)
+                                    if not is_type_conversion(v):
+                                        update += 1
+                                        setattr(r,k,v)
                             except Exception as noop:
                                 # unset columns in a returned row may get here,
                                 # but that's ok in most cases.
