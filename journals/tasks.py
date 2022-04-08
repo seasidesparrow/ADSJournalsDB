@@ -49,14 +49,14 @@ app.conf.CELERY_QUEUES = (
 
 def is_type_conversion(newval, oldval):
     if newval != oldval:
-        try:
-            if str(newval) == oldval or int(newval) == oldval:
-                return True
-        except Exception as noop:
-            pass
-        return False
-    else:
-        return True
+        if oldval and type(oldval) == str:
+            try:
+                if newval and (type(newval) == int or type(newval) == float):
+                    if str(newval) == oldval:
+                        return True
+            except Exception as noop:
+                pass
+    return False
 
 @app.task(queue='load-datafiles')
 def task_setstatus(idno, status_msg):
@@ -448,7 +448,7 @@ def task_update_table(checkin, masterdict):
                                 if k != tk and v != getattr(r,k):
                                     # do a quick check to see if the difference
                                     # is due to str(v) != int(v)
-                                    if not is_type_conversion(v):
+                                    if not is_type_conversion(v, getattr(r,k)):
                                         update += 1
                                         setattr(r,k,v)
                             except Exception as noop:
