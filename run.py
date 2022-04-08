@@ -167,7 +167,7 @@ def load_completeness(masterdict):
             vol_end = value.get('endvol', None)
             complete = value.get('complete', None)
             url = value.get('url', None)
-            notes = '; '.join([value.get('notes', None), url])
+            notes = '; '.join([value.get('notes', None), url]).strip('; ')
             recsh.append((mid,year_start,vol_start,vol_end,complete,pid,notes))
     if recsh:
         tasks.task_db_load_titlehist(recsh)
