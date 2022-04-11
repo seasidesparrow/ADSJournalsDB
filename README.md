@@ -7,7 +7,7 @@ information, and history tables.
 ## Initial table population via run.py
 
 ```
-python3 run.py -lm -lc -la -lr -ls
+python3 run.py -lf
 ```
 
 ## Table checkout to / checkin from Google Sheets
