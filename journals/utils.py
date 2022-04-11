@@ -94,6 +94,25 @@ def export_to_bibstemsdat(rows):
                 raise ExportBibstemsException(err+': '+str(r))
 
 
+def export_issns(rows):
+    i2j_file = config.get('lol', None)
+    j2i_file = config.get('wut', None)
+    # for issn2journals...
+    outfile = i2j_file + '.NEW'
+    with open(outfile, 'w') as f:
+        for r in rows:
+            f.write('%s\t%s\n' % (r['issn'], r['bibstem']))
+
+    # for journal_issn...
+    nrows = str(len(rows))
+    size = "0"
+    outfile = j2i_file + '.NEW'
+    with open(outfile, 'w') as f:
+        f.write('\t%s %s\n' % (nrows, size))
+        for r in rows:
+            f.write('%s\t%s\t%s\n' % (r['bibstem'], r['issn'], r['name']))
+
+
 def read_abbreviations_list():
     datadict = {}
     infile = config.get('JOURNAL_ABBREV_FILE')

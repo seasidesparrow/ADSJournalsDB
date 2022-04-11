@@ -113,6 +113,18 @@ def task_export_classic_files():
         except Exception as err:
             logger.error("Problem exporting master to bibstems.dat: %s" % err)
 
+    with app.session_scope() as session:
+        result = session.query(idents.id_value, master.bibstem, master.journal_name).join(master, idents.masterid == master.masterid).filter(idents.id_type=='ISSN_print').all()
+        rows = []
+        for r in result:
+            (issn, bibstem, name) = r
+            bibstem = bibstem.ljust(5, '.')
+            rows.append({'bibstem': bibstem, 'issn': issn, 'name': name})
+        try:
+            export_issns(rows)
+        except Exception as err:
+            logger.error("Problem exporting to issn2journal: %s" % err)
+
 
 @app.task(queue='load-datafiles')
 def task_db_load_abbrevs(recs):
