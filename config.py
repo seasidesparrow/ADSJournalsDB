@@ -21,6 +21,8 @@ JOURNAL_ISSN_FILE = JDB_DATA_DIR + 'journal_issn'
 ISSN_JOURNAL_FILE = JDB_DATA_DIR + 'issn2journal'
 CANONICAL_BIB_FILE = JDB_DATA_DIR + 'bib2accno.dat'
 
+NONINDEXED_FILE = JDB_DATA_DIR + 'non_indexed.txt'
+
 # RASTERIZING.xml directory
 RASTER_CONFIG_DIR = JDB_DATA_DIR + 'raster_config/'
 

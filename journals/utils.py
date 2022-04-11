@@ -251,6 +251,19 @@ def read_raster_xml(masterdict):
 
     return recs
 
+def read_nonindexed():
+    nonindexed = {}
+    infile = config.get('NONINDEXED_FILE',None)
+    if infile:
+        with open(infile, 'r') as fn:
+            for l in fn.readlines():
+                try:
+                    (bibstem, issn, name) = l.strip().split('\t')
+                    nonindexed[bibstem] = {'issn': issn, 'name': name}
+                except Exception as err:
+                    pass
+    return nonindexed
+
 
 def parse_refsource_str(srcstr):
     try:

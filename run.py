@@ -213,6 +213,29 @@ def load_issn(masterdict):
     return
 
 
+def load_nonindexed():
+    try:
+        nonindexed = utils.read_nonindexed()
+        tasks.task_db_insert_nonindexed(nonindexed)
+    except Exception as err:
+        logger.error("Failed to load nonindexed bibstems from %s: %s" % (config.get('NONINDEXED_FILE', None), err))
+    else:
+        masterdict = tasks.task_db_get_bibstem_masterid()
+        recsi = []
+        for k, v in nonindexed.items():
+            try:
+                mid = masterdict[k]
+            except Exception as err:
+                logger.warning("missing masterid for bibstem %s" % k)
+            else:
+                recsi.append((mid, v['issn']))
+        if len(recsi) != len(nonindexed.keys()):
+            logger.warning("Lines were skipped when reading ISSNs from file")
+        if recsi:
+            tasks.task_db_upsert_issn(recsi)
+    return
+
+
 def checkin_table(tablename, masterdict, delete_flag):
     try:
         tasks.task_checkin_table(tablename, masterdict, delete_flag=delete_flag)
@@ -249,6 +272,7 @@ def load_full_database():
             load_abbreviations(masterdict)
             load_rasterconfig(masterdict)
             load_refsources(masterdict)
+            load_nonindexed()
         except Exception as err:
             logger.warning("Error loading auxilliary tables: %s" % err)
 

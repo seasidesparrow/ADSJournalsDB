@@ -311,6 +311,23 @@ def task_db_load_refsource(masterid, refsrc):
             logger.error("No refsource data to load!")
     return
 
+
+@app.task(queue='load-datafiles')
+def task_db_insert_nonindexed_bibstems(nonindexed_dict):
+    with app.session_scope() as session:
+        for k, v in nonindexed_dict.items():
+            try:
+                session.add(master(bibstem=k, journal_name=v['name'],
+                                   pubtype='Other', refereed='na',
+                                   not_indexed=True))
+                session.commit()
+            except Exception as err:
+                logger.warning("Error adding nonindexed record %s: %s" % (k, err))
+                session.rollback()
+                session.commit()
+    return
+
+
 @app.task(queue='load-datafiles')
 def task_export_table_data(tablename):
     try:
