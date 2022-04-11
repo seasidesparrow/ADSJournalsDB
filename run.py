@@ -193,30 +193,10 @@ def load_refsources(masterdict):
         logger.debug("Loaded bibstems: %s\tMissing bibstems: %s" % (len(loaded_stems), len(missing_stems)))
 
 
-def load_issn(masterdict):
-    try:
-        issn_dict = utils.read_issn_file()
-        recsif = []
-        for k, v in issn_dict.items():
-            try:
-                mid = masterdict[k]
-                recsif.append((mid, v))
-            except Exception as noop:
-                logger.debug("bibstem %s is not in masterdict, skipping" % k)
-        if len(recsi) != len(issn_dict.keys()):
-            logger.warning("Lines were skipped when reading ISSNs from file")
-        if recsi:
-            tasks.task_db_upsert_issn(recsi)
-    except Exception as err:
-        logger.error("Failed to load ISSNs from %s: %s" % (config.get('JOURNAL_ISSN_FILE', None), err))
-
-    return
-
-
 def load_nonindexed():
     try:
         nonindexed = utils.read_nonindexed()
-        tasks.task_db_insert_nonindexed(nonindexed)
+        tasks.task_db_insert_nonindexed_bibstems(nonindexed)
     except Exception as err:
         logger.error("Failed to load nonindexed bibstems from %s: %s" % (config.get('NONINDEXED_FILE', None), err))
     else:
@@ -232,7 +212,7 @@ def load_nonindexed():
         if len(recsi) != len(nonindexed.keys()):
             logger.warning("Lines were skipped when reading ISSNs from file")
         if recsi:
-            tasks.task_db_upsert_issn(recsi)
+            tasks.task_db_load_identifier(recsi, idtype='ISSN_print')
     return
 
 
