@@ -95,8 +95,8 @@ def export_to_bibstemsdat(rows):
 
 
 def export_issns(rows):
-    i2j_file = config.get('lol', None)
-    j2i_file = config.get('wut', None)
+    i2j_file = config.get('ISSN_JOURNAL_FILE', None)
+    j2i_file = config.get('JOURNAL_ISSN_FILE', None)
     # for issn2journals...
     outfile = i2j_file + '.NEW'
     with open(outfile, 'w') as f:
