@@ -136,8 +136,7 @@ def read_abbreviations_list():
     return datadict
 
 
-def read_issn_file():
-    issn_dict = {}
+def read_issn_files():
     try:
         infile = config.get('JOURNAL_ISSN_FILE')
         with open(infile, 'r', encoding=get_encoding(infile)) as f:
@@ -147,12 +146,14 @@ def read_issn_file():
                     (bibstem, issn, pubname) = l.strip().split('\t')
                 except Exception as err:
                     # logger.warn("Unparseable csv: {0}".format(l.strip()))
+                    print("Unparseable csv: {0}".format(l.strip()))
                     pass
                 else:
                     bibstem = bibstem.rstrip('.')
                     issn_dict[bibstem] = issn
     except Exception as err:
         # logger.error("Error in read_issn_file: %s" % err)
+        print("Error in read_issn_file: %s" % err)
         pass
     return issn_dict
 

@@ -208,11 +208,17 @@ def load_nonindexed():
             except Exception as err:
                 logger.warning("missing masterid for bibstem %s" % k)
             else:
-                recsi.append((mid, v['issn']))
+                r = {'masterid': mid, 'id_type': 'ISSN_print', 'id_value': v['issn']}
+                recsi.append(r)
         if len(recsi) != len(nonindexed.keys()):
             logger.warning("Lines were skipped when reading ISSNs from file")
         if recsi:
-            tasks.task_db_load_identifier(recsi, idtype='ISSN_print')
+            checkin = {'tablename': 'idents',
+                       'editid': -1,
+                       'data': recsi
+                      }
+            status = task_update_table(checkin, masterdict)
+
     return
 
 
