@@ -33,6 +33,7 @@ BIBSTEM_VOLUMES = ['book', 'conf', 'work', 'proc', 'rept', 'symp', 'prop']
 
 EDITABLE_TABLES = ['abbrevs', 'master', 'idents', 'names', 'publisher', 'titlehistory']
 
+CLEARABLE_TABLES = ['raster', 'rastervol', 'refsource']
 
 '''
    configuration for Google Sheets service

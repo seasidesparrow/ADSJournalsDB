@@ -341,6 +341,19 @@ def task_db_insert_nonindexed_bibstems(nonindexed_dict):
 
 
 @app.task(queue='load-datafiles')
+def task_clear_table(cleartable):
+    if cleartable in config.get('CLEARABLE_TABLES', []):
+        with app.session_scope() as session:
+            try:
+                session.query(cleartable).delete()
+                session.commit()
+            except Exception as err:
+                session.rollback()
+                session.commit()
+                raise ClearTableException(err)
+
+
+@app.task(queue='load-datafiles')
 def task_export_table_data(tablename):
     try:
         with app.session_scope() as session:
