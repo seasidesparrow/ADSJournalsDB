@@ -30,6 +30,18 @@ def get_arguments():
                         action='store_true',
                         help='Load all files from text / classic')
 
+    parser.add_argument('-lr',
+                        '--load-rasterconf',
+                        dest='load_raster',
+                        action='store_true',
+                        help='Load rasterization control parameters')
+
+    parser.add_argument('-ls',
+                        '--load-refsources',
+                        dest='load_refsources',
+                        action='store_true',
+                        help='Load refsources from citing2file.dat')
+
     parser.add_argument('-dc',
                         '--dump-classic-files',
                         dest='dump_classic',
@@ -155,7 +167,7 @@ def load_completeness(masterdict):
         tasks.task_db_load_identifier(recsi, idtype='ISSN_print')
     if recsx:
         tasks.task_db_load_identifier(recsx, idtype='Crossref')
-        
+
     recsh = []
     for key, value in list(pub_dict.items()):
         if key in masterdict:
@@ -217,7 +229,7 @@ def load_nonindexed():
                        'editid': -1,
                        'data': recsi
                       }
-            status = task_update_table(checkin, masterdict)
+            status = tasks.task_update_table(checkin, masterdict)
 
     return
 
@@ -270,21 +282,46 @@ def main():
 
     args = get_arguments()
 
+    # These don't require masterdict
     if args.load_full:
         load_full_database()
-    else:
-        if args.checkin_table:
-            try:
-                masterdict = tasks.task_db_get_bibstem_masterid()
-                checkin_table(args.checkin_table, masterdict, args.delete_flag)
-            except Exception as err:
-                logger.warning("Error checking in table %s: %s" % (args.checkin_table, err))
-        
-        if args.checkout_table:
-            checkout_table(args.checkout_table)
 
-        if args.dump_classic:
-            tasks.task_export_classic_files()
+    elif args.checkout_table:
+        checkout_table(args.checkout_table)
+
+    elif args.dump_classic:
+         tasks.task_export_classic_files()
+
+    else:
+        # These do require masterdict
+        try:
+            masterdict = tasks.task_db_get_bibstem_masterid()
+        except Exception as err:
+            logger.warning("Error loading masterdict: %s" % err)
+        else:
+
+            if args.checkin_table:
+                try:
+                    checkin_table(args.checkin_table, masterdict, args.delete_flag)
+                except Exception as err:
+                    logger.warning("Error checking in table %s: %s" % (args.checkin_table, err))
+
+            elif args.load_raster:
+                try:
+                    tasks.task_clear_table('rastervol')
+                    tasks.task_clear_table('raster')
+                except Exception as err:
+                    logger.warning("Error clearing raster tables: %s" % err)
+                else:
+                    load_rasterconfig(masterdict)
+
+            elif args.load_refsources:
+                try:
+                    tasks.task_clear_table('refsource')
+                except Exception as err:
+                    logger.warning("Error clearing refsource table: %s" % err)
+                else:
+                    load_refsources(masterdict)
 
 
 if __name__ == '__main__':

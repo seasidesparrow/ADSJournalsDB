@@ -91,6 +91,10 @@ class TableCheckoutException(Exception):
     pass
 
 
+class ClearTableException(Exception):
+    pass
+
+
 #Utils Exceptions
 class ReadBibstemException(Exception):
     pass
