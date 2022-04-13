@@ -394,16 +394,13 @@ class JournalsRasterVolume(Base):
 class JournalsRefSource(Base):
     __tablename__ = 'refsource'
 
-    refsourceid = Column(Integer, primary_key=True, autoincrement=True,
-                         unique=True, nullable=False)
     masterid = Column(Integer, ForeignKey('master.masterid'),
                       primary_key=True, nullable=False)
     refsource_list = Column(Text)
     created = Column(UTCDateTime, default=get_date)
-    updated = Column(UTCDateTime, onupdate=get_date)
 
     def __repr__(self):
-        return "refsource.refsourceid='{self.refsourceid}'".format(self=self)
+        return "refsource.masterid='{self.masterid}'".format(self=self)
 
 
 class JournalsEditControl(Base):

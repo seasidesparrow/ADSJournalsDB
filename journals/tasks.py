@@ -34,7 +34,8 @@ TABLES = {'master': master, 'master_hist': master_hist,
           'idents': idents, 'idents_hist': idents_hist,
           'publisher': publisher, 'publisher_hist': publisher_hist,
           'raster': raster, 'raster_hist': raster_hist,
-          'titlehistory': titlehistory, 'titlehistory_hist': titlehistory_hist}
+          'titlehistory': titlehistory, 'titlehistory_hist': titlehistory_hist,
+          'refsource': refsource, 'rastervol': rastervol}
 
 TABLE_UNIQID = {'master': 'masterid', 'names': 'nameid', 'abbrevs': 'abbrevid', 'idents': 'identid', 'publisher': 'publisherid', 'titlehistory': 'titlehistoryid', 'raster': 'rasterid', 'rastervol': 'rvolid'}
 
@@ -345,7 +346,8 @@ def task_clear_table(cleartable):
     if cleartable in config.get('CLEARABLE_TABLES', []):
         with app.session_scope() as session:
             try:
-                session.query(cleartable).delete()
+                tabl = TABLES[cleartable]
+                session.query(tabl).delete(synchronize_session='fetch')
                 session.commit()
             except Exception as err:
                 session.rollback()

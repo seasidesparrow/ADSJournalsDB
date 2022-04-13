@@ -297,17 +297,13 @@ def upgrade():
 
     # history table not required
     op.create_table('refsource',
-                    sa.Column('refsourceid', sa.Integer(), autoincrement=True,
-                              nullable=False),
                     sa.Column('masterid', sa.Integer(), nullable=False),
                     sa.Column('refsource_list', sa.Text(), nullable=True),
                     sa.Column('created', UTCDateTime, nullable=True,
                               default=get_date),
-                    sa.Column('updated', UTCDateTime, nullable=True,
-                              onupdate=get_date),
                     sa.ForeignKeyConstraint(['masterid'], ['master.masterid']),
-                    sa.PrimaryKeyConstraint('refsourceid', 'masterid'),
-                    sa.UniqueConstraint('refsourceid'))
+                    sa.PrimaryKeyConstraint('masterid'),
+                    sa.UniqueConstraint('masterid'))
 
     # history table not required
     op.create_table('editcontrol',
