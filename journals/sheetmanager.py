@@ -63,6 +63,7 @@ class SpreadsheetManager(object):
             self.service.import_csv(sheetid, data=data.encode(encoding))
             if self.sheet:
                 self._protect_rows(tablename)
+                self.sheet.sheet1.freeze(rows=1)
         except Exception as err:
             raise WriteTableException(err)
 
