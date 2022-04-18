@@ -26,6 +26,7 @@ from journals.models import JournalsEditControl as editctrl
 from journals.utils import *
 from journals.exceptions import *
 from journals.sheetmanager import SpreadsheetManager
+from journals.slackhandler import SlackPublisher
 import journals.refsource as refsrc
 
 TABLES = {'master': master, 'master_hist': master_hist,
@@ -422,7 +423,13 @@ def task_checkout_table(tablename):
                     sheet.write_table(sheetid=sheet.sheetid, data=data, tablename=tablename, encoding='utf-8')
                 except Exception as err:
                     raise WriteDataToSheetException(err)
-
+            try:
+                fileurl = 'https://docs.google.com/spreadsheets/d/' + sheet.sheetid
+                message = 'Table %s checked out to %s' % (tablename, fileurl)
+                slack = SlackPublisher()
+                slack.publish(message)
+            except Exception as err:
+                logger.warning('error publishing message to Slack: %s' % err)
     except Exception as err:
         raise TableCheckoutException("Error checking out table %s: %s" % (tablename, err))
 
@@ -452,6 +459,13 @@ def task_checkin_table(tablename, masterdict, delete_flag=False):
                     raise FatalCheckinException(err)
                 else:
                     task_setstatus(checkin['editid'], status)
+                    try:
+                        fileurl = 'https://docs.google.com/spreadsheets/d/' + sheet.sheetid
+                        message = 'Table %s checked in from Sheets with status: %s' % (tablename, status)
+                        slack = SlackPublisher()
+                        slack.publish(message)
+                    except Exception as err:
+                        logger.warning('error publishing message to Slack: %s' % err)
 
 
             else:
@@ -517,7 +531,7 @@ def task_update_table(checkin, masterdict):
                         # the same key.
                         failure.append(row)
                 except Exception as err:
-                    # something really fundamentally bad happened while 
+                    # something really fundamentally bad happened while
                     # handling this...
                     failure.append(row)
 
@@ -527,7 +541,7 @@ def task_update_table(checkin, masterdict):
                     data = t()
                     try:
                         new_masterid = r['masterid']
-                        new_bibstem = r['bibstem'] 
+                        new_bibstem = r['bibstem']
                         if masterdict[new_bibstem]:
                             if r['masterid'] == '' or r['masterid'] == None:
                                 r['masterid'] = masterdict[new_bibstem]
