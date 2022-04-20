@@ -122,3 +122,7 @@ class ReadRefsourcesException(Exception):
 
 class ExportBibstemsException(Exception):
     pass
+
+
+class ExportISSNException(Exception):
+    pass

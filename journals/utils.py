@@ -67,50 +67,59 @@ def read_bibstems_list():
 
 
 def export_to_bibstemsdat(rows):
-    infile = config.get('BIBSTEMS_FILE')
-    outfile = infile + '.NEW'
-    with open(outfile, 'w') as f:
+    outfile = config.get('BIBSTEMS_FILE')
+    if rows:
         nrows = str(len(rows))
-        f.write(' %s\n' % nrows)
-        for r in rows:
-            try:
-                if r['pubtype'] == 'Conf. Proc.':
-                    out_type = 'C'
-                elif r['pubtype'] == 'Journal':
-                    if r['refereed'] == 'yes':
-                        out_type = 'R'
+        with open(outfile, 'w') as f:
+            f.write(' %s\n' % nrows)
+            for r in rows:
+                try:
+                    if r['pubtype'] == 'Conf. Proc.':
+                        out_type = 'C'
+                    elif r['pubtype'] == 'Journal':
+                        if r['refereed'] == 'yes':
+                            out_type = 'R'
+                        else:
+                            out_type = 'J'
+                    out_bibstem = ''
+                    if len(r['bibstem']) <= 9 and (r['bibstem'][0] not in ['1','2']):
+                        out_bibstem = '....' + r['bibstem']
                     else:
-                        out_type = 'J'
-                out_bibstem = ''
-                if len(r['bibstem']) <= 9 and (r['bibstem'][0] not in ['1','2']):
-                    out_bibstem = '....' + r['bibstem']
-                else:
-                    out_bibstem = r['bibstem']
-                if len(out_bibstem) < 13:
-                    out_bibstem = out_bibstem.ljust(13, '.')
-                f.write("%s\t%s\t%s\n" % (out_bibstem, out_type, r['pubname']))
-            except Exception as err:
-                f.close()
-                raise ExportBibstemsException(err+': '+str(r))
+                        out_bibstem = r['bibstem']
+                    if len(out_bibstem) < 13:
+                        out_bibstem = out_bibstem.ljust(13, '.')
+                    f.write("%s\t%s\t%s\n" % (out_bibstem, out_type, r['pubname']))
+                except Exception as err:
+                    f.close()
+                    raise ExportBibstemsException(err+': '+str(r))
+        return "Success: %s rows exported." % nrows
 
 
 def export_issns(rows):
     i2j_file = config.get('ISSN_JOURNAL_FILE', None)
     j2i_file = config.get('JOURNAL_ISSN_FILE', None)
-    # for issn2journals...
-    outfile = i2j_file + '.NEW'
-    with open(outfile, 'w') as f:
-        for r in rows:
-            f.write('%s\t%s\n' % (r['issn'], r['bibstem']))
+    if rows:
+        nrows = str(len(rows))
+        try:
 
-    # for journal_issn...
-    nrows = str(len(rows))
-    size = "0"
-    outfile = j2i_file + '.NEW'
-    with open(outfile, 'w') as f:
-        f.write('\t%s %s\n' % (nrows, size))
-        for r in rows:
-            f.write('%s\t%s\t%s\n' % (r['bibstem'], r['issn'], r['name']))
+            # for issn2journals...
+            if i2j_file:
+                with open(i2j_file, 'w') as f:
+                    for r in rows:
+                        f.write('%s\t%s\n' % (r['issn'], r['bibstem']))
+
+            # for journal_issn...
+            size = "0"
+            if j2i_file:
+                with open(j2i_file, 'w') as f:
+                    f.write('\t%s %s\n' % (nrows, size))
+                    for r in rows:
+                        f.write('%s\t%s\t%s\n' % (r['bibstem'], r['issn'], r['name']))
+        except Exception as err:
+            raise ExportISSNException(err)
+        else:
+            return "Success: %s rows exported." % nrows
+    
 
 
 def read_abbreviations_list():

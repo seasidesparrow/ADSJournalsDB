@@ -104,6 +104,12 @@ def task_db_bibstems_to_master(recs):
 
 @app.task(queue='load-datafiles')
 def task_export_classic_files():
+
+    # pending successful returns...
+    result_bibstems = 'failed'
+    result_issn = 'failed'
+
+    # bibstems
     with app.session_scope() as session:
         result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.masterid.asc()).all()
         rows = []
@@ -111,10 +117,11 @@ def task_export_classic_files():
             (bibstem,pubtype,refereed,pubname) = r
             rows.append({'bibstem': bibstem, 'pubtype': pubtype, 'refereed': refereed, 'pubname':pubname})
         try:
-            export_to_bibstemsdat(rows)
+            result_bibstems = export_to_bibstemsdat(rows)
         except Exception as err:
             logger.error("Problem exporting master to bibstems.dat: %s" % err)
 
+    # ISSNs
     with app.session_scope() as session:
         result = session.query(idents.id_value, master.bibstem, master.journal_name).join(master, idents.masterid == master.masterid).filter(idents.id_type=='ISSN_print').all()
         rows = []
@@ -123,9 +130,11 @@ def task_export_classic_files():
             bibstem = bibstem.ljust(5, '.')
             rows.append({'bibstem': bibstem, 'issn': issn, 'name': name})
         try:
-            export_issns(rows)
+            result_issn = export_issns(rows)
         except Exception as err:
-            logger.error("Problem exporting to issn2journal: %s" % err)
+            logger.error("Problem exporting ISSNs to files: %s" % err)
+
+    # return "Bibstems: %s ; ISSNs: %s" % (result_bibstems, result_issn)
 
 
 @app.task(queue='load-datafiles')
