@@ -69,13 +69,6 @@ def get_arguments():
                         default=False,
                         help='Delete checked-in sheet from Google')
 
-    parser.add_argument('-ro',
-                        '--reactivate-last-checkout',
-                        dest='reactivate_xo',
-                        action='store',
-                        default=None,
-                        help='Reactivate last failed checkout/checkin of TABLE')
-
     args = parser.parse_args()
     return args
 
@@ -256,15 +249,6 @@ def checkout_table(tablename):
         tasks.task_checkout_table(tablename)
     except Exception as err:
         logger.warning("Unable to checkout table %s: %s" % (tablename, err))
-    else:
-        logger.warning("Table %s is available in Sheets" % tablename)
-
-
-def reactivate_table(tablename):
-    try:
-        tasks.task_reactivate_table(tablename)
-    except Exception as err:
-        logger.warning("Unable to reactivate table %s: %s" % (tablename, err))
     else:
         logger.warning("Table %s is available in Sheets" % tablename)
 
