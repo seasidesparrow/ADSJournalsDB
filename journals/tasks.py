@@ -482,6 +482,13 @@ def task_checkin_table(tablename, masterdict, delete_flag=False):
 
     except Exception as err:
         raise TableCheckinException("Error checking in table %s: %s" % (tablename, err))
+    else:
+        if status == 'completed':
+            if tablename == 'master':
+                try:
+                    task_export_classic_files()
+                except Exception as err:
+                    raise TableCheckinException("Failed to export bibstems.dat: %s" % err)
 
 
 @app.task(queue='load-datafiles')
