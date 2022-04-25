@@ -126,3 +126,7 @@ class ExportBibstemsException(Exception):
 
 class ExportISSNException(Exception):
     pass
+
+
+class BackupFileException(Exception):
+    pass

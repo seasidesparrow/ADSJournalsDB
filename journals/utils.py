@@ -3,6 +3,7 @@ import chardet
 import csv
 import os
 import requests
+import shutil
 import string
 import urllib3
 from adsputils import load_config
@@ -67,32 +68,37 @@ def read_bibstems_list():
 
 
 def export_to_bibstemsdat(rows):
-    outfile = config.get('BIBSTEMS_FILE')
     if rows:
-        nrows = str(len(rows))
-        with open(outfile, 'w') as f:
-            f.write(' %s\n' % nrows)
-            for r in rows:
-                try:
-                    if r['pubtype'] == 'Conf. Proc.':
-                        out_type = 'C'
-                    elif r['pubtype'] == 'Journal':
-                        if r['refereed'] == 'yes':
-                            out_type = 'R'
+        try:
+            outfile = config.get('BIBSTEMS_FILE')
+            backup_export_file(outfile)
+        except Exception as err:
+            ExportBibstemsException(err)
+        else:
+            nrows = str(len(rows))
+            with open(outfile, 'w') as f:
+                f.write(' %s\n' % nrows)
+                for r in rows:
+                    try:
+                        if r['pubtype'] == 'Conf. Proc.':
+                            out_type = 'C'
+                        elif r['pubtype'] == 'Journal':
+                            if r['refereed'] == 'yes':
+                                out_type = 'R'
+                            else:
+                                out_type = 'J'
+                        out_bibstem = ''
+                        if len(r['bibstem']) <= 9 and (r['bibstem'][0] not in ['1','2']):
+                            out_bibstem = '....' + r['bibstem']
                         else:
-                            out_type = 'J'
-                    out_bibstem = ''
-                    if len(r['bibstem']) <= 9 and (r['bibstem'][0] not in ['1','2']):
-                        out_bibstem = '....' + r['bibstem']
-                    else:
-                        out_bibstem = r['bibstem']
-                    if len(out_bibstem) < 13:
-                        out_bibstem = out_bibstem.ljust(13, '.')
-                    f.write("%s\t%s\t%s\n" % (out_bibstem, out_type, r['pubname']))
-                except Exception as err:
-                    f.close()
-                    raise ExportBibstemsException(err+': '+str(r))
-        return "Success: %s rows exported." % nrows
+                            out_bibstem = r['bibstem']
+                        if len(out_bibstem) < 13:
+                            out_bibstem = out_bibstem.ljust(13, '.')
+                        f.write("%s\t%s\t%s\n" % (out_bibstem, out_type, r['pubname']))
+                    except Exception as err:
+                        f.close()
+                        raise ExportBibstemsException(err+': '+str(r))
+            return "Success: %s rows exported." % nrows
 
 
 def export_issns(rows):
@@ -396,3 +402,28 @@ def fix_booleans(input_dict):
         return output_dict
     else:
         return input_dict
+
+
+def backup_export_file(filepath):
+    maxcount = 3
+
+    try:
+
+        flist = glob(filepath+'.[123]')
+        filedir = os.path.dirname(filepath)
+        filename = os.path.basename(filepath)
+        try:
+            flist.remove(filepath+'.'+str(maxcount))
+        except:
+            pass
+        flist.sort(reverse=True)
+        for f in flist:
+            ifile = int(f.replace(filepath+'.',''))
+            newf = filepath+'.'+str(ifile+1)
+            os.rename(f,newf)
+        shutil.copy2(filepath,filepath+'.1')
+
+    except Exception as err:
+        raise BackupFileException(err)
+
+    return
