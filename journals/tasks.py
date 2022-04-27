@@ -408,7 +408,7 @@ def task_export_table_data(tablename, results=None):
             if results:
                 column_count = len(results[0])
                 blank_row = [''] * column_count
-                pad_count = 50
+                pad_count = config.get('PADCOUNT_DEFAULT', 0)
                 for i in range(pad_count):
                     results.append(blank_row)
 

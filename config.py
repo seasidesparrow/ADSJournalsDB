@@ -48,3 +48,4 @@ HOME_FOLDER_ID = 'dummy_folder_id'
 
 EDITORS = ['mygmailaccount@gmail.com']
 
+PADCOUNT_DEFAULT = 50
