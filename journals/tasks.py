@@ -366,38 +366,51 @@ def task_clear_table(cleartable):
 
 
 @app.task(queue='load-datafiles')
-def task_export_table_data(tablename):
+def task_export_table_data(tablename, results=None):
     try:
+        data = io.StringIO()
+        csvout = csv.writer(data, quoting=csv.QUOTE_NONNUMERIC)
         with app.session_scope() as session:
-            data = io.StringIO()
-            csvout = csv.writer(data, quoting=csv.QUOTE_NONNUMERIC)
-
             if tablename == 'master':
                 csvout.writerow(('masterid','bibstem','journal_name','primary_language','multilingual','defunct','pubtype','refereed','collection','notes','not_indexed'))
-                results = session.query(master.masterid, master.bibstem, master.journal_name, master.primary_language, master.multilingual, master.defunct, master.pubtype, master.refereed, master.collection, master.notes, master.not_indexed).order_by(master.masterid.asc()).all()
+                if not results:
+                    results = session.query(master.masterid, master.bibstem, master.journal_name, master.primary_language, master.multilingual, master.defunct, master.pubtype, master.refereed, master.collection, master.notes, master.not_indexed).order_by(master.masterid.asc()).all()
 
             elif tablename == 'names':
                 csvout.writerow(('nameid','masterid','bibstem','name_english_translated','title_language','name_native_language','name_normalized'))
-                results = session.query(names.nameid, names.masterid, master.bibstem, names.name_english_translated, names.title_language, names.name_native_language, names.name_normalized).join(master, names.masterid == master.masterid).order_by(names.masterid.asc()).all()
+                if not results:
+                    results = session.query(names.nameid, names.masterid, master.bibstem, names.name_english_translated, names.title_language, names.name_native_language, names.name_normalized).join(master, names.masterid == master.masterid).order_by(names.masterid.asc()).all()
 
             elif tablename == 'idents':
                 csvout.writerow(('identid','masterid','bibstem','id_type','id_value'))
-                results = session.query(idents.identid, idents.masterid, master.bibstem, idents.id_type, idents.id_value).join(master, idents.masterid == master.masterid).order_by(idents.masterid.asc()).all()
+                if not results:
+                    results = session.query(idents.identid, idents.masterid, master.bibstem, idents.id_type, idents.id_value).join(master, idents.masterid == master.masterid).order_by(idents.masterid.asc()).all()
 
             elif tablename == 'abbrevs':
                 csvout.writerow(('abbrevid','masterid','bibstem','abbreviation'))
-                results = session.query(abbrevs.abbrevid, abbrevs.masterid, master.bibstem, abbrevs.abbreviation).join(master, abbrevs.masterid == master.masterid).order_by(abbrevs.masterid.asc()).all()
+                if not results:
+                    results = session.query(abbrevs.abbrevid, abbrevs.masterid, master.bibstem, abbrevs.abbreviation).join(master, abbrevs.masterid == master.masterid).order_by(abbrevs.masterid.asc()).all()
 
             elif tablename == 'publisher':
                 csvout.writerow(('publisherid','pubname','pubaddress','pubcontact','puburl','pubextid','notes'))
-                results = session.query(publisher.publisherid, publisher.pubname, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.notes).order_by(publisher.publisherid.asc()).all()
+                if not results:
+                    results = session.query(publisher.publisherid, publisher.pubname, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.notes).order_by(publisher.publisherid.asc()).all()
 
             elif tablename == 'titlehistory':
                 csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','complete','publisherid','successor_masterid','notes'))
-                results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
+                if not results:
+                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
 
             else:
                 results = []
+
+            # pad the results with [pad_count] blank lines
+            if results:
+                column_count = len(results[0])
+                blank_row = [''] * column_count
+                pad_count = 50
+                for i in range(pad_count):
+                    results.append(blank_row)
 
             for rec in results:
                 csvout.writerow(rec)
@@ -428,7 +441,7 @@ def task_checkout_table(tablename):
                 session.commit()
 
                 try:
-                    data = task_export_table_data(tablename)
+                    data = task_export_table_data(tablename, results=None)
                     sheet.write_table(sheetid=sheet.sheetid, data=data, tablename=tablename, encoding='utf-8')
                 except Exception as err:
                     raise WriteDataToSheetException(err)
