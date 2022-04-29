@@ -441,7 +441,8 @@ def task_checkout_table(tablename):
                 session.commit()
 
                 try:
-                    data = task_export_table_data(tablename, results=None)
+                    if not data:
+                        data = task_export_table_data(tablename, results=None)
                     sheet.write_table(sheetid=sheet.sheetid, data=data, tablename=tablename, encoding='utf-8')
                 except Exception as err:
                     raise WriteDataToSheetException(err)
