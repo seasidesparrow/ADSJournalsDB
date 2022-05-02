@@ -16,7 +16,7 @@ fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from journals.models import Base
+# from journalsmanager.models import Base
 # target_metadata = Base.metadata
 target_metadata = None
 
@@ -50,7 +50,7 @@ def get_app_config(key):
     if opath not in sys.path:
         sys.path.insert(0, opath)
 
-    from journals.tasks import app
+    from journalsmanager.tasks import app
 
     print('Getting actual config for', key, app.conf.get(key))
     return app.conf.get(key)

@@ -5,29 +5,29 @@ import io
 import json
 import os
 from kombu import Queue
-from journals import app as app_module
-from journals.models import JournalsMaster as master
-from journals.models import JournalsMasterHistory as master_hist
-from journals.models import JournalsNames as names
-from journals.models import JournalsNamesHistory as names_hist
-from journals.models import JournalsAbbreviations as abbrevs
-from journals.models import JournalsAbbreviationsHistory as abbrevs_hist
-from journals.models import JournalsIdentifiers as idents
-from journals.models import JournalsIdentifiersHistory as idents_hist
-from journals.models import JournalsPublisher as publisher
-from journals.models import JournalsPublisherHistory as publisher_hist
-from journals.models import JournalsRaster as raster
-from journals.models import JournalsRasterHistory as raster_hist
-from journals.models import JournalsRasterVolume as rastervol
-from journals.models import JournalsRefSource as refsource
-from journals.models import JournalsTitleHistory as titlehistory
-from journals.models import JournalsTitleHistoryHistory as titlehistory_hist
-from journals.models import JournalsEditControl as editctrl
-from journals.utils import *
-from journals.exceptions import *
-from journals.sheetmanager import SpreadsheetManager
-from journals.slackhandler import SlackPublisher
-import journals.refsource as refsrc
+from journalsmanager import app as app_module
+from journalsmanager.models import JournalsMaster as master
+from journalsmanager.models import JournalsMasterHistory as master_hist
+from journalsmanager.models import JournalsNames as names
+from journalsmanager.models import JournalsNamesHistory as names_hist
+from journalsmanager.models import JournalsAbbreviations as abbrevs
+from journalsmanager.models import JournalsAbbreviationsHistory as abbrevs_hist
+from journalsmanager.models import JournalsIdentifiers as idents
+from journalsmanager.models import JournalsIdentifiersHistory as idents_hist
+from journalsmanager.models import JournalsPublisher as publisher
+from journalsmanager.models import JournalsPublisherHistory as publisher_hist
+from journalsmanager.models import JournalsRaster as raster
+from journalsmanager.models import JournalsRasterHistory as raster_hist
+from journalsmanager.models import JournalsRasterVolume as rastervol
+from journalsmanager.models import JournalsRefSource as refsource
+from journalsmanager.models import JournalsTitleHistory as titlehistory
+from journalsmanager.models import JournalsTitleHistoryHistory as titlehistory_hist
+from journalsmanager.models import JournalsEditControl as editctrl
+from journalsmanager.utils import *
+from journalsmanager.exceptions import *
+from journalsmanager.sheetmanager import SpreadsheetManager
+from journalsmanager.slackhandler import SlackPublisher
+import journalsmanager.refsource as refsrc
 
 TABLES = {'master': master, 'master_hist': master_hist,
           'names': names, 'names_hist': names_hist,
@@ -49,6 +49,7 @@ app.conf.CELERY_QUEUES = (
     Queue('load-datafiles', app.exchange, routing_key='load-datafiles'),
 )
 
+
 def is_type_conversion(newval, oldval):
     if newval != oldval:
         if oldval and type(oldval) == str:
@@ -59,6 +60,7 @@ def is_type_conversion(newval, oldval):
             except Exception as noop:
                 pass
     return False
+
 
 @app.task(queue='load-datafiles')
 def task_setstatus(idno, status_msg):
@@ -71,6 +73,7 @@ def task_setstatus(idno, status_msg):
             session.rollback()
             session.flush()
             raise UpdateStatusException(err)
+
 
 @app.task(queue='load-datafiles')
 def task_db_bibstems_to_master(recs):
@@ -193,6 +196,7 @@ def task_db_load_titlehist(recs):
                     session.flush()
         else:
             logger.info("No titlehistory loaded.")
+
 
 @app.task(queue='load-datafiles')
 def task_db_load_publisher(recs):
@@ -366,55 +370,68 @@ def task_clear_table(cleartable):
 
 
 @app.task(queue='load-datafiles')
-def task_export_table_data(tablename):
-    try:
-        with app.session_scope() as session:
+def task_export_table_data(tablename, results):
+    with app.session_scope() as session:
+        try:
             data = io.StringIO()
             csvout = csv.writer(data, quoting=csv.QUOTE_NONNUMERIC)
-
             if tablename == 'master':
                 csvout.writerow(('masterid','bibstem','journal_name','primary_language','multilingual','defunct','pubtype','refereed','collection','notes','not_indexed'))
-                results = session.query(master.masterid, master.bibstem, master.journal_name, master.primary_language, master.multilingual, master.defunct, master.pubtype, master.refereed, master.collection, master.notes, master.not_indexed).order_by(master.masterid.asc()).all()
+                if not results:
+                    results = session.query(master.masterid, master.bibstem, master.journal_name, master.primary_language, master.multilingual, master.defunct, master.pubtype, master.refereed, master.collection, master.notes, master.not_indexed).order_by(master.masterid.asc()).all()
 
             elif tablename == 'names':
                 csvout.writerow(('nameid','masterid','bibstem','name_english_translated','title_language','name_native_language','name_normalized'))
-                results = session.query(names.nameid, names.masterid, master.bibstem, names.name_english_translated, names.title_language, names.name_native_language, names.name_normalized).join(master, names.masterid == master.masterid).order_by(names.masterid.asc()).all()
+                if not results:
+                    results = session.query(names.nameid, names.masterid, master.bibstem, names.name_english_translated, names.title_language, names.name_native_language, names.name_normalized).join(master, names.masterid == master.masterid).order_by(names.masterid.asc()).all()
 
             elif tablename == 'idents':
                 csvout.writerow(('identid','masterid','bibstem','id_type','id_value'))
-                results = session.query(idents.identid, idents.masterid, master.bibstem, idents.id_type, idents.id_value).join(master, idents.masterid == master.masterid).order_by(idents.masterid.asc()).all()
+                if not results:
+                    results = session.query(idents.identid, idents.masterid, master.bibstem, idents.id_type, idents.id_value).join(master, idents.masterid == master.masterid).order_by(idents.masterid.asc()).all()
 
             elif tablename == 'abbrevs':
                 csvout.writerow(('abbrevid','masterid','bibstem','abbreviation'))
-                results = session.query(abbrevs.abbrevid, abbrevs.masterid, master.bibstem, abbrevs.abbreviation).join(master, abbrevs.masterid == master.masterid).order_by(abbrevs.masterid.asc()).all()
+                if not results:
+                    results = session.query(abbrevs.abbrevid, abbrevs.masterid, master.bibstem, abbrevs.abbreviation).join(master, abbrevs.masterid == master.masterid).order_by(abbrevs.masterid.asc()).all()
 
             elif tablename == 'publisher':
                 csvout.writerow(('publisherid','pubname','pubaddress','pubcontact','puburl','pubextid','notes'))
-                results = session.query(publisher.publisherid, publisher.pubname, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.notes).order_by(publisher.publisherid.asc()).all()
+                if not results:
+                    results = session.query(publisher.publisherid, publisher.pubname, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.notes).order_by(publisher.publisherid.asc()).all()
 
             elif tablename == 'titlehistory':
                 csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','complete','publisherid','successor_masterid','notes'))
-                results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
+                if not results:
+                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
 
             else:
                 results = []
 
+            # pad the results with [pad_count] blank lines
+            if results:
+                column_count = len(results[0])
+                blank_row = [''] * column_count
+                pad_count = config.get('PADCOUNT_DEFAULT', 0)
+                for i in range(pad_count):
+                    results.append(blank_row)
+
             for rec in results:
                 csvout.writerow(rec)
 
-    except Exception as err:
-        return
-    else:
-        return data.getvalue()
+        except Exception as err:
+            return
+        else:
+            return data.getvalue()
 
 @app.task(queue='load-datafiles')
-def task_checkout_table(tablename):
+def task_checkout_table(tablename, results):
 
     if tablename.lower() not in app.conf.EDITABLE_TABLES:
         raise InvalidTableException("Tablename %s is not valid" % tablename)
 
-    try:
-        with app.session_scope() as session:
+    with app.session_scope() as session:
+        try:
             table_record = session.query(editctrl).filter(editctrl.tablename.ilike(tablename), editctrl.editstatus=='active').first()
 
             if table_record:
@@ -428,7 +445,7 @@ def task_checkout_table(tablename):
                 session.commit()
 
                 try:
-                    data = task_export_table_data(tablename)
+                    data = task_export_table_data(tablename, results)
                     sheet.write_table(sheetid=sheet.sheetid, data=data, tablename=tablename, encoding='utf-8')
                 except Exception as err:
                     raise WriteDataToSheetException(err)
@@ -439,8 +456,8 @@ def task_checkout_table(tablename):
                 slack.publish(message)
             except Exception as err:
                 logger.warning('error publishing message to Slack: %s' % err)
-    except Exception as err:
-        raise TableCheckoutException("Error checking out table %s: %s" % (tablename, err))
+        except Exception as err:
+            raise TableCheckoutException("Error checking out table %s: %s" % (tablename, err))
 
 
 @app.task(queue='load-datafiles')
@@ -449,8 +466,8 @@ def task_checkin_table(tablename, masterdict, delete_flag=False):
     if tablename.lower() not in app.conf.EDITABLE_TABLES:
         raise InvalidTableException("Tablename %s is not valid" % tablename)
 
-    try:
-        with app.session_scope() as session:
+    with app.session_scope() as session:
+        try:
             table_record = session.query(editctrl).filter(editctrl.tablename.ilike(tablename), editctrl.editstatus=='active').first()
 
             if table_record:
@@ -463,32 +480,15 @@ def task_checkin_table(tablename, masterdict, delete_flag=False):
                            'data': data
                           }
                 try:
-                    status = task_update_table(checkin, masterdict)
+                    task_update_table(checkin, masterdict)
                 except Exception as err:
                     raise FatalCheckinException(err)
-                else:
-                    task_setstatus(checkin['editid'], status)
-                    try:
-                        fileurl = 'https://docs.google.com/spreadsheets/d/' + sheet.sheetid
-                        message = 'Table %s checked in from Sheets with status: %s' % (tablename, status)
-                        slack = SlackPublisher()
-                        slack.publish(message)
-                    except Exception as err:
-                        logger.warning('error publishing message to Slack: %s' % err)
-
 
             else:
                 logger.debug("Table %s is not checked out." % tablename)
 
-    except Exception as err:
-        raise TableCheckinException("Error checking in table %s: %s" % (tablename, err))
-    else:
-        if status == 'completed':
-            if tablename == 'master':
-                try:
-                    task_export_classic_files()
-                except Exception as err:
-                    raise TableCheckinException("Failed to export bibstems.dat: %s" % err)
+        except Exception as err:
+            raise TableCheckinException("Error checking in table %s: %s" % (tablename, err))
 
 
 @app.task(queue='load-datafiles')
@@ -501,9 +501,12 @@ def task_update_table(checkin, masterdict):
         modify = list()
         discard = list()
         failure = list()
+        status = 'completed'
+        # determine what's new and what's an update, and perform updates
+        # as they're found
+        t = TABLES[tablename]
+        tk = TABLE_UNIQID[tablename]
         with app.session_scope() as session:
-            t = TABLES[tablename]
-            tk = TABLE_UNIQID[tablename]
             for row in checkin_data:
                 keyval = row.get(tk, -1)
                 try:
@@ -531,10 +534,17 @@ def task_update_table(checkin, masterdict):
                                 pass
                         if update > 0:
                             # this commits changes made to r
-                            session.commit()
+                            try:
+                                session.commit()
+                                modify.append(old_rowdat)
+                            except Exception as err:
+                                logger.warning("Problem with row update: %s" % err)
+                                session.rollback()
+                                session.flush()
+                                failure.append(row)
+
                             # insert the original record into modify list
                             # to be written to _hist
-                            modify.append(old_rowdat)
                         else:
                             discard.append(row)
                     elif len(q) == 0:
@@ -551,7 +561,8 @@ def task_update_table(checkin, masterdict):
                     # handling this...
                     failure.append(row)
 
-                # create new records
+        # create new records
+        # with app.session_scope() as session:
             for r in create:
                 try:
                     data = t()
@@ -593,16 +604,41 @@ def task_update_table(checkin, masterdict):
                     session.rollback()
                     session.flush()
 
-            logger.info('Total records from sheet: %s New; %s Updates; %s Ignored; %s Problematic' % (len(create), len(modify), len(discard), len(failure)))
+        logger.info('Total records from sheet: %s New; %s Updates; %s Ignored; %s Problematic' % (len(create), len(modify), len(discard), len(failure)))
 
-            if len(failure) != 0:
-                # IN PROGRESS: you need to do something more useful than
-                # just flagging the checkin as failed in editcontrol.  Send
-                # failed rows to file or logger in such a way that they can
-                # be examined and fixed with a new checkout/checkin
-                return 'failed'
-            else:
-                return 'completed'
+        # Finishing up: mark table as failed or completed, re-export failed
+        # rows, and send messages to slack
+        if len(failure) != 0:
+            status = 'failed'
+
+        try:
+            if editid > 0:
+                task_setstatus(editid, status)
+                message = 'Table %s checked in from Sheets with status: %s' % (tablename, status)
+                slack = SlackPublisher()
+                slack.publish(message)
+        except Exception as err:
+            logger.warning('error publishing message to Slack: %s' % err)
+
+        if len(failure) != 0:
+            try:
+                re_export = []
+                for rec in failure:
+                    lineout=[]
+                    for k,v in rec.items():
+                        lineout.append(v)
+                    re_export.append(lineout)
+                task_checkout_table(tablename, re_export)
+            except Exception as err:
+                logger.warning('unable to re-export failed rows: %s' % err)
+        else:
+            if status == 'completed':
+                if tablename == 'master':
+                    try:
+                        task_export_classic_files()
+                    except Exception as err:
+                        raise TableCheckinException("Failed to export bibstems.dat: %s" % err)
+
 
     except Exception as err:
         raise UpdateTableException(err)

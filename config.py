@@ -2,7 +2,7 @@ LOGGING_LEVEL = 'WARNING'
 LOG_STDOUT = True
 
 '''
-    configuration for ADSJournals postgres database
+    configuration for ADSJournals database
 '''
 # COLLECTIONS is a list of which collections/databases are stored
 COLLECTIONS = ['ast', 'phy', 'gen', 'pre']
@@ -47,4 +47,26 @@ TOKEN_FILE = SECRETS_PATH + 'bar.dat'
 HOME_FOLDER_ID = 'dummy_folder_id'
 
 EDITORS = ['mygmailaccount@gmail.com']
+
+PADCOUNT_DEFAULT = 50
+
+#----------------------------------------------------------
+
+'''
+    configuration for journalsdb_service microservice
+'''
+# Holdings query config
+SERVICE_TOKEN = None
+HOLDINGS_SOLR_QUERY_URL = 'https://api.adsabs.harvard.edu/v1/search/query'
+
+# Specify the maximum number of bibstems the microservice can query
+JOURNALSDB_MAX_SUBMITTED = 100
+
+# Specify where the journals database lives
+SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://user:pwd@localhost:5432/journals'
+#SQLALCHEMY_ECHO = False
+DISCOVERER_PUBLISH_ENDPOINT = '/resources'
+
+# Advertise its own route within DISCOVERER_PUBLISH_ENDPOINT
+DISCOVERER_SELF_PUBLISH = False
 
