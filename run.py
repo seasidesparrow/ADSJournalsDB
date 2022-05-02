@@ -6,8 +6,8 @@ import argparse
 import json
 import os
 from adsputils import setup_logging, load_config
-from journals import tasks
-from journals import utils
+from journalsmanager import tasks
+from journalsmanager import utils
 
 proj_home = os.path.realpath(os.path.dirname(__file__))
 config = load_config(proj_home=proj_home)
@@ -246,7 +246,7 @@ def checkin_table(tablename, masterdict, delete_flag):
 
 def checkout_table(tablename):
     try:
-        tasks.task_checkout_table(tablename)
+        tasks.task_checkout_table(tablename, [])
     except Exception as err:
         logger.warning("Unable to checkout table %s: %s" % (tablename, err))
     else:

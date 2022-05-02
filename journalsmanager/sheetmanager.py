@@ -1,6 +1,6 @@
 import gspread
 from datetime import datetime
-from journals.exceptions import *
+from journalsmanager.exceptions import *
 
 PROTECTED_COLS = 'A1:B99999'
 HILIGHT_PROTECTED = {'textFormat': {'bold': True},
