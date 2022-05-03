@@ -6,23 +6,23 @@ import json
 import os
 from kombu import Queue
 from journalsmanager import app as app_module
-from journalsmanager.models import JournalsMaster as master
-from journalsmanager.models import JournalsMasterHistory as master_hist
-from journalsmanager.models import JournalsNames as names
-from journalsmanager.models import JournalsNamesHistory as names_hist
-from journalsmanager.models import JournalsAbbreviations as abbrevs
-from journalsmanager.models import JournalsAbbreviationsHistory as abbrevs_hist
-from journalsmanager.models import JournalsIdentifiers as idents
-from journalsmanager.models import JournalsIdentifiersHistory as idents_hist
-from journalsmanager.models import JournalsPublisher as publisher
-from journalsmanager.models import JournalsPublisherHistory as publisher_hist
-from journalsmanager.models import JournalsRaster as raster
-from journalsmanager.models import JournalsRasterHistory as raster_hist
-from journalsmanager.models import JournalsRasterVolume as rastervol
-from journalsmanager.models import JournalsRefSource as refsource
-from journalsmanager.models import JournalsTitleHistory as titlehistory
-from journalsmanager.models import JournalsTitleHistoryHistory as titlehistory_hist
-from journalsmanager.models import JournalsEditControl as editctrl
+from journalsdb.models import JournalsMaster as master
+from journalsdb.models import JournalsMasterHistory as master_hist
+from journalsdb.models import JournalsNames as names
+from journalsdb.models import JournalsNamesHistory as names_hist
+from journalsdb.models import JournalsAbbreviations as abbrevs
+from journalsdb.models import JournalsAbbreviationsHistory as abbrevs_hist
+from journalsdb.models import JournalsIdentifiers as idents
+from journalsdb.models import JournalsIdentifiersHistory as idents_hist
+from journalsdb.models import JournalsPublisher as publisher
+from journalsdb.models import JournalsPublisherHistory as publisher_hist
+from journalsdb.models import JournalsRaster as raster
+from journalsdb.models import JournalsRasterHistory as raster_hist
+from journalsdb.models import JournalsRasterVolume as rastervol
+from journalsdb.models import JournalsRefSource as refsource
+from journalsdb.models import JournalsTitleHistory as titlehistory
+from journalsdb.models import JournalsTitleHistoryHistory as titlehistory_hist
+from journalsdb.models import JournalsEditControl as editctrl
 from journalsmanager.utils import *
 from journalsmanager.exceptions import *
 from journalsmanager.sheetmanager import SpreadsheetManager

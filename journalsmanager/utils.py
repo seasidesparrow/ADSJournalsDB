@@ -76,6 +76,7 @@ def export_to_bibstemsdat(rows):
             ExportBibstemsException(err)
         else:
             nrows = str(len(rows))
+            os.chmod(outfile, 0o666)
             with open(outfile, 'w') as f:
                 f.write(' %s\n' % nrows)
                 for r in rows:
@@ -98,6 +99,7 @@ def export_to_bibstemsdat(rows):
                     except Exception as err:
                         f.close()
                         raise ExportBibstemsException(err+': '+str(r))
+            os.chmod(outfile, 0o444)
             return "Success: %s rows exported." % nrows
 
 
@@ -410,6 +412,8 @@ def backup_export_file(filepath):
     try:
 
         flist = glob(filepath+'.[123]')
+        for f in flist:
+            os.chmod(f, 0o666)
         filedir = os.path.dirname(filepath)
         filename = os.path.basename(filepath)
         try:
@@ -422,6 +426,9 @@ def backup_export_file(filepath):
             newf = filepath+'.'+str(ifile+1)
             os.rename(f,newf)
         shutil.copy2(filepath,filepath+'.1')
+        flist = glob(filepath+'.[123]')
+        for f in flist:
+            os.chmod(f, 0o444)
 
     except Exception as err:
         raise BackupFileException(err)

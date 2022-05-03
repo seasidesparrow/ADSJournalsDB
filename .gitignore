@@ -1,0 +1,6 @@
+logs/
+*/logs/
+*.pyc
+local_config.py
+credentials.json
+token.json

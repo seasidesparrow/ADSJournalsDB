@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 from werkzeug.serving import run_simple
-from flask import Flask
 from .views import Summary, Journal, Holdings, Refsource
 from flask_restful import Api
 from flask_discoverer import Discoverer
