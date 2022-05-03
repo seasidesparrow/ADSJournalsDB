@@ -1,4 +1,7 @@
-from adsputils import get_date, UTCDateTime
+try:
+    from adsputils import get_date, UTCDateTime
+except ImportError:
+    from adsmutils import get_date, UTCDateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (Table, Column, Integer, Numeric, String, TIMESTAMP,
                         ForeignKey, Boolean, Float, Text, UniqueConstraint)

@@ -6,7 +6,7 @@ from flask_restful import Resource
 from flask_discoverer import advertise
 from datetime import datetime
 from dateutil import parser
-from journalsmgr.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource
+from journalsdb.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource
 from journalsservice.solrquery import SolrQuery
 import adsmutils
 
