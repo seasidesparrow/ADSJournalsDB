@@ -57,7 +57,7 @@ PADCOUNT_DEFAULT = 50
 '''
 # Holdings query config
 SERVICE_TOKEN = None
-HOLDINGS_SOLR_QUERY_URL = 'https://api.adsabs.harvard.edu/v1/search/query'
+HOLDINGS_ADS_QUERY_URL = 'https://api.adsabs.harvard.edu/v1/search/query'
 
 # Specify the maximum number of bibstems the microservice can query
 JOURNALSDB_MAX_SUBMITTED = 100

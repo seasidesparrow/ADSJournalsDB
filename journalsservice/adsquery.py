@@ -14,14 +14,14 @@ class EmptyBibstemException(Exception):
     pass
 
 
-class SolrQuery(object):
+class ADSQuery(object):
 
     def __init__(self):
         try:
             self.token = current_app.config.get('SERVICE_TOKEN', None) or \
                          request.headers.get('X-Forwarded-Authorization', \
                          request.headers.get('Authorization', ''))
-            self.queryurl = current_app.config.get('HOLDINGS_SOLR_QUERY_URL', None)
+            self.queryurl = current_app.config.get('HOLDINGS_ADS_QUERY_URL', None)
             # self.holdings_query = '?q=bibstem:%s,volume:%s&fl=bibstem,year,volume,page,esources&rows=2000&sort=page+asc&wt=json'
         except Exception as err:
             raise HoldingsInitException(err)
