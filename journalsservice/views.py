@@ -7,7 +7,7 @@ from flask_discoverer import advertise
 from datetime import datetime
 from dateutil import parser
 from journalsdb.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource
-from journalsservice.solrquery import SolrQuery
+from journalsservice.adsquery import ADSQuery
 import adsmutils
 
 def liken(text):
@@ -85,7 +85,7 @@ class Holdings(Resource):
 
     def get(self, bibstem, volume):
         try:
-            q = SolrQuery()
+            q = ADSQuery()
             result = q.search(bibstem, volume)
         except Exception as err:
             return {'Error': 'Holdings search failed',
