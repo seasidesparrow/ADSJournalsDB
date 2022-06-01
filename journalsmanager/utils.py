@@ -15,6 +15,8 @@ from journalsmanager.refsource import RefCount, RefVolume, RefSource
 proj_home = os.path.realpath(os.path.dirname(__file__)+ '/../')
 config = load_config(proj_home=proj_home)
 
+JDB_DATA_DIR = config.get('JDB_DATA_DIR', '/')
+
 
 def parse_bibcodes(bibcode):
     parsed_bib = {}
@@ -50,7 +52,7 @@ def get_encoding(filename):
 
 def read_bibstems_list():
     data = {}
-    infile = config.get('BIBSTEMS_FILE')
+    infile = JDB_DATA_DIR + '/bibstems.dat'
     try:
         with open(infile, 'r', encoding=get_encoding(infile)) as f:
             nbibstem = f.readline()
@@ -70,7 +72,7 @@ def read_bibstems_list():
 def export_to_bibstemsdat(rows):
     if rows:
         try:
-            outfile = config.get('BIBSTEMS_FILE')
+            outfile = JDB_DATA_DIR + config.get('BIBSTEMS_FILE', 'error.file')
             backup_export_file(outfile)
         except Exception as err:
             ExportBibstemsException(err)
@@ -104,8 +106,8 @@ def export_to_bibstemsdat(rows):
 
 
 def export_issns(rows):
-    i2j_file = config.get('ISSN_JOURNAL_FILE', None)
-    j2i_file = config.get('JOURNAL_ISSN_FILE', None)
+    i2j_file = JDB_DATA_DIR + config.get('ISSN_JOURNAL_FILE', 'error.file')
+    j2i_file = JDB_DATA_DIR + config.get('JOURNAL_ISSN_FILE', 'error.file')
     if rows:
         nrows = str(len(rows))
         try:
@@ -132,7 +134,7 @@ def export_issns(rows):
 
 def read_abbreviations_list():
     datadict = {}
-    infile = config.get('JOURNAL_ABBREV_FILE')
+    infile = JDB_DATA_DIR + '/' + config.get('JOURNAL_ABBREV_FILE', 'error.file')
     try:
         with open(infile, 'r', encoding=get_encoding(infile)) as f:
             for l in f.readlines():
@@ -155,7 +157,7 @@ def read_abbreviations_list():
 
 def read_issn_files():
     try:
-        infile = config.get('JOURNAL_ISSN_FILE')
+        infile = JDB_DATA_DIR + '/' + config.get('JOURNAL_ISSN_FILE')
         with open(infile, 'r', encoding=get_encoding(infile)) as f:
             f.readline()
             for l in f.readlines():
@@ -178,7 +180,7 @@ def read_issn_files():
 def read_complete_csvs():
     data = {}
     for coll in config.get('COLLECTIONS'):
-        infile = config.get('JDB_DATA_DIR') + 'completion.' + coll + '.csv'
+        infile = JDB_DATA_DIR + '/completion.' + coll + '.csv'
         if os.path.exists(infile):
             try:
                 with open(infile, 'r', encoding=get_encoding(infile)) as f:
@@ -290,7 +292,7 @@ def read_raster_xml(masterdict):
 
 def read_nonindexed():
     nonindexed = {}
-    infile = config.get('NONINDEXED_FILE',None)
+    infile = JDB_DATA_DIR + '/' + config.get('NONINDEXED_FILE',None)
     if infile:
         with open(infile, 'r') as fn:
             for l in fn.readlines():
@@ -365,7 +367,7 @@ def create_refsource():
     volume pair a row.
     '''
     refsources = {}
-    infile = config.get('BIB_TO_REFS_FILE')
+    infile = JDB_DATA_DIR + '/' + config.get('BIB_TO_REFS_FILE')
     with open(infile, 'r') as fin:
         for l in fin.readlines():
             try:

@@ -22,12 +22,10 @@ class ADSQuery(object):
                          request.headers.get('X-Forwarded-Authorization', \
                          request.headers.get('Authorization', ''))
             self.queryurl = current_app.config.get('HOLDINGS_ADS_QUERY_URL', None)
-            # self.holdings_query = '?q=bibstem:%s,volume:%s&fl=bibstem,year,volume,page,esources&rows=2000&sort=page+asc&wt=json'
         except Exception as err:
             raise HoldingsInitException(err)
         else:
             pass
-
 
     def search(self, bibstem=None, volume='*'):
         if bibstem:
@@ -35,6 +33,8 @@ class ADSQuery(object):
                 params = {
                     'q': 'bibstem:%s,volume:%s' % (bibstem, volume),
                     'wt': 'json',
+                    'rows': 2000,
+                    'sort': 'bibcode asc',
                     'fl': 'bibstem,year,volume,page,esources'
                 }
                 headers = {
