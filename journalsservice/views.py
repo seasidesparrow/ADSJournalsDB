@@ -6,7 +6,7 @@ from flask_restful import Resource
 from flask_discoverer import advertise
 from datetime import datetime
 from dateutil import parser
-from journalsdb.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource
+from journalsdb.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource, JournalsTitleHistory
 from journalsservice.adsquery import ADSQuery
 import adsmutils
 
@@ -29,18 +29,27 @@ class Summary(Resource):
                     dat_master = session.query(JournalsMaster).filter_by(bibstem=bibstem).first()
                     try:
                         masterid = dat_master.masterid
+                        
                     except Exception as err:
                         return {'Error': 'Search failed',
                                 'Error Info': 'Bibstem "%s" not found.' % bibstem}, 200
                     else:
                         dat_abbrev = [rec.toJSON() for rec in session.query(JournalsAbbreviations).filter_by(masterid=masterid).all()]
                         dat_idents = [rec.toJSON() for rec in session.query(JournalsIdentifiers).filter_by(masterid=masterid).all()]
-                        dat_publisher = [rec.toJSON() for rec in session.query(JournalsPublisher).filter_by(masterid=masterid).all()]
+                        dat_titlehist = [rec.toJSON() for rec in session.query(JournalsTitleHistory).filter_by(masterid=masterid).all()]
+                        dat_pubhist = []
+                        if dat_titlehist:
+                            for t in dat_titlehist:
+                                publisherid = t.get('publisherid', None)
+                                if publisherid:
+                                    pub = [rec.toJSON() for rec in session.query(JournalsPublisher).filter_by(publisherid=publisherid).all()]
+                                    pubhist = {'publisher': pub, 'title': t}
+                                    dat_pubhist.append(pubhist)
                         result_json = {'summary': 
                                           {'master': dat_master.toJSON(),
                                            'idents': dat_idents,
                                            'abbrev': dat_abbrev,
-                                           'publisher': dat_publisher
+                                           'pubhist': dat_pubhist
                                           }
                                       }
     

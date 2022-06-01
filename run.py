@@ -191,18 +191,23 @@ def load_refsources(masterdict):
     loaded_stems = []
 
     if refsources:
-        for bibstem, refsource in refsources.items():
-            try:
-                bibstem = bibstem.rstrip('.')
-                masterid = masterdict[bibstem]
-            except Exception as err:
-                logger.debug("missing masterdict bibstem: (%s)" % bibstem)
-                missing_stems.append(bibstem)
-            else:
-                tasks.task_db_load_refsource(masterid,refsource)
-                loaded_stems.append(bibstem)
+        try:
+            tasks.task_db_clear_refsource()
+        except Exception as err:
+            logger.warning("Unable to clear existing refsources table: %s" % err)
+        else:
+            for bibstem, refsource in refsources.items():
+                try:
+                    bibstem = bibstem.rstrip('.')
+                    masterid = masterdict[bibstem]
+                except Exception as err:
+                    logger.debug("missing masterdict bibstem: (%s)" % bibstem)
+                    missing_stems.append(bibstem)
+                else:
+                    tasks.task_db_load_refsource(masterid,refsource)
+                    loaded_stems.append(bibstem)
 
-        logger.debug("Loaded bibstems: %s\tMissing bibstems: %s" % (len(loaded_stems), len(missing_stems)))
+            logger.debug("Loaded bibstems: %s\tMissing bibstems: %s" % (len(loaded_stems), len(missing_stems)))
 
 
 def load_nonindexed():
@@ -210,7 +215,7 @@ def load_nonindexed():
         nonindexed = utils.read_nonindexed()
         tasks.task_db_insert_nonindexed_bibstems(nonindexed)
     except Exception as err:
-        logger.error("Failed to load nonindexed bibstems from %s: %s" % (config.get('NONINDEXED_FILE', None), err))
+        logger.error("Failed to load nonindexed bibstems from %s: %s" % ((config.get('JDB_DATA_DIR','/') + config.get('NONINDEXED_FILE', 'error.file')), err))
     else:
         masterdict = tasks.task_db_get_bibstem_masterid()
         recsi = []

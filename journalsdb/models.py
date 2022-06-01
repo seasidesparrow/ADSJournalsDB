@@ -35,8 +35,7 @@ class JournalsMaster(Base):
         return "master.masterid='{self.masterid}'".format(self=self)
 
     def toJSON(self):
-        return {'masterid': self.masterid,
-                'bibstem': self.bibstem,
+        return {'bibstem': self.bibstem,
                 'journal_name': self.journal_name,
                 'primary_language': self.primary_language,
                 'multilingual': self.multilingual,
@@ -45,9 +44,7 @@ class JournalsMaster(Base):
                 'refereed': self.refereed,
                 'collection': self.collection,
                 'notes': self.notes,
-                'not_indexed': self.not_indexed,
-                'created': self.created,
-                'updated': self.updated}
+                'not_indexed': self.not_indexed}
 
 
 class JournalsMasterHistory(Base):
@@ -93,14 +90,10 @@ class JournalsNames(Base):
         return "names.masterid='{self.masterid}'".format(self=self)
 
     def toJSON(self):
-        return {'nameid': self.nameid,
-                'masterid': self.masterid,
-                'name_english_translated': self.name_english_translated,
+        return {'name_english_translated': self.name_english_translated,
                 'title_language': self.title_language,
                 'name_native_language': self.name_native_language,
-                'name_normalized': self.name_normalized,
-                'created': self.created,
-                'updated': self.updated}
+                'name_normalized': self.name_normalized}
 
 
 class JournalsNamesHistory(Base):
@@ -138,11 +131,7 @@ class JournalsAbbreviations(Base):
         return "abbrevs.abbrevid='{self.abbrevid}'".format(self=self)
 
     def toJSON(self):
-        return {'abbrevid': self.abbrevid,
-                'masterid': self.masterid,
-                'abbreviation': self.abbreviation,
-                'created': self.created,
-                'updated': self.updated}
+        return {'abbreviation': self.abbreviation}
 
 
 class JournalsAbbreviationsHistory(Base):
@@ -178,12 +167,8 @@ class JournalsIdentifiers(Base):
         return "idents.identid='{self.identid}'".format(self=self)
 
     def toJSON(self):
-        return{'identid': self.identid,
-               'masterid': self.masterid,
-               'id_type': self.id_type,
-               'id_value': self.id_value,
-               'created': self.created,
-               'updated': self.updated}
+        return{'id_type': self.id_type,
+               'id_value': self.id_value}
 
 
 class JournalsIdentifiersHistory(Base):
@@ -227,10 +212,8 @@ class JournalsPublisher(Base):
                 'pubaddress': self.pubaddress,
                 'pubcontact': self.pubcontact,
                 'puburl': self.puburl,
-                'pubextid': self.pubgrid,
-                'notes': self.notes,
-                'created': self.created,
-                'updated': self.updated}
+                'pubextid': self.pubextid,
+                'notes': self.notes}
 
 class JournalsPublisherHistory(Base):
     __tablename__ = 'publisher_hist'
@@ -275,18 +258,14 @@ class JournalsTitleHistory(Base):
         return "titlehistory.titlehistoryid='{self.titlehistoryid}'".format(self=self)
 
     def toJSON(self):
-        return {'titlehistoryid': self.titlehistoryid,
-                'masterid': self.masterid,
-                'year_start': self.year_start,
+        return {'year_start': self.year_start,
                 'year_end': self.year_end,
                 'vol_start': self.vol_start,
                 'vol_end': self.vol_end,
                 'complete': self.complete,
                 'publisherid': self.publisherid,
                 'successor_masterid': self.successor_masterid,
-                'notes': self.notes,
-                'created': self.created,
-                'updated': self.updated}
+                'notes': self.notes}
 
 class JournalsTitleHistoryHistory(Base):
     __tablename__ = 'titlehistory_hist'
@@ -334,18 +313,14 @@ class JournalsRaster(Base):
         return "raster.rasterid='{self.rasterid}'".format(self=self)
 
     def toJSON(self):
-        return{'rasterid': self.rasterid,
-               'masterid': self.masterid,
-               'copyrt_file': self.copyrt_file,
+        return{'copyrt_file': self.copyrt_file,
                'pubtype': self.pubtype,
                'bibstem': self.bibstem,
                'abbrev': self.abbrev,
                'width': self.width,
                'height': self.height,
                'embargo': self.embargo,
-               'options': self.options,
-               'created': self.created,
-               'updated': self.updated}
+               'options': self.options}
 
 
 class JournalsRasterHistory(Base):
@@ -387,12 +362,9 @@ class JournalsRasterVolume(Base):
         return "rastervolume.rvolid='{self.rasterid}'".format(self=self)
 
     def toJSON(self):
-        return {'rvolid': self.rvolid,
-                'rasterid': self.rasterid,
-                'volume_number': self.volume_number,
-                'volume_properties': self.volume_properties,
-                'created': self.created,
-                'updated': self.updated}
+        return {'volume_number': self.volume_number,
+                'volume_properties': self.volume_properties}
+
 
 class JournalsRefSource(Base):
     __tablename__ = 'refsource'

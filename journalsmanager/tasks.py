@@ -319,6 +319,18 @@ def task_db_get_publisherid():
             raise DBReadException("Could not read from publisher: %s" % err)
     return dictionary
 
+@app.task(queue='load-datafiles')
+def task_db_clear_refsource():
+    with app.session_scope() as session:
+        try:
+            count = session.query(refsource).delete()
+            session.commit()
+            logger.info("Refsource table cleared.")
+        except Exception as err:
+            session.rollback()
+            session.commit()
+            logger.error("Failed to delete rows from refsource! %s" % err)
+            raise DBClearException("Could not clear existing rows from refsource: %s" % str(err))
 
 @app.task(queue='load-datafiles')
 def task_db_load_refsource(masterid, refsrc):

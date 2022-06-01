@@ -74,6 +74,10 @@ class DBReadException(Exception):
     """Non-recoverable Error with making database selection."""
     pass
 
+class DBClearException(Exception):
+    """Non-recoverable Error with clearing a full table (prior to reload)."""
+    pass
+
 
 class InvalidTableException(Exception):
     pass
