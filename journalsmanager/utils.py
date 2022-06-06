@@ -424,7 +424,8 @@ def backup_export_file(filepath):
             pass
         flist.sort(reverse=True)
         for f in flist:
-            ifile = int(f.replace(filepath+'.',''))
+            fileparts = f.split('.')
+            ifile = int(fileparts[-1])
             newf = filepath+'.'+str(ifile+1)
             os.rename(f,newf)
         shutil.copy2(filepath,filepath+'.1')
