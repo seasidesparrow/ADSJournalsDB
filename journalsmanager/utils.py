@@ -1,6 +1,8 @@
 from __future__ import print_function
 import chardet
 import csv
+import grp
+import pwd
 import os
 import requests
 import shutil
@@ -16,6 +18,14 @@ proj_home = os.path.realpath(os.path.dirname(__file__)+ '/../')
 config = load_config(proj_home=proj_home)
 
 JDB_DATA_DIR = config.get('JDB_DATA_DIR', '/')
+
+def chowner(filename, uname='ads', ugroup='ads'):
+    try:
+        uid = pwd.getpwnam(uname).pw_uid
+        gid = grp.getgrnam(ugroup).gr_gid
+        os.chown(filename, uid, gid)
+    except Exception as err:
+        raise FileOwnershipError(err)
 
 
 def parse_bibcodes(bibcode):
@@ -102,6 +112,7 @@ def export_to_bibstemsdat(rows):
                         f.close()
                         raise ExportBibstemsException(err+': '+str(r))
             os.chmod(outfile, 0o444)
+            chowner(outfile)
             return "Success: %s rows exported." % nrows
 
 
@@ -408,12 +419,11 @@ def fix_booleans(input_dict):
         return input_dict
 
 
-def backup_export_file(filepath):
-    maxcount = 3
+def backup_export_file(filepath, maxcount=3):
 
     try:
-
-        flist = glob(filepath+'.[123]')
+        glob_string = '.[1-' + str(maxcount) + ']'
+        flist = glob(filepath + glob_string)
         for f in flist:
             os.chmod(f, 0o666)
         filedir = os.path.dirname(filepath)
@@ -429,9 +439,11 @@ def backup_export_file(filepath):
             newf = filepath+'.'+str(ifile+1)
             os.rename(f,newf)
         shutil.copy2(filepath,filepath+'.1')
-        flist = glob(filepath+'.[123]')
+
+        flist = glob(filepath + glob_string)
         for f in flist:
             os.chmod(f, 0o444)
+            chowner(f)
 
     except Exception as err:
         raise BackupFileException(err)

@@ -34,7 +34,7 @@ class Summary(Resource):
                         return {'Error': 'Search failed',
                                 'Error Info': 'Bibstem "%s" not found.' % bibstem}, 200
                     else:
-                        dat_abbrev = [rec.toJSON() for rec in session.query(JournalsAbbreviations).filter_by(masterid=masterid).all()]
+                        dat_abbrev = [rec.toJSON()['abbreviation'] for rec in session.query(JournalsAbbreviations).filter_by(masterid=masterid).all()]
                         dat_idents = [rec.toJSON() for rec in session.query(JournalsIdentifiers).filter_by(masterid=masterid).all()]
                         dat_titlehist = [rec.toJSON() for rec in session.query(JournalsTitleHistory).filter_by(masterid=masterid).all()]
                         dat_pubhist = []
@@ -95,7 +95,16 @@ class Holdings(Resource):
     def get(self, bibstem, volume):
         try:
             q = ADSQuery()
-            result = q.search(bibstem, volume)
+            solr_result = q.search(bibstem, volume)
+            data = solr_result['response']
+            count = data['numFound']
+            volume = data['docs'][0]['volume']
+            bibstem = data['docs'][0]['bibstem'][0]
+            holdings = [{'esources': rec['esources'], 'page': rec['page'][0]} for rec in data['docs']]
+            result = {'bibstem': bibstem,
+                      'volume': volume,
+                      'numFound': count,
+                      'holdings': holdings}
         except Exception as err:
             return {'Error': 'Holdings search failed',
                     'Error Info': 'Unspecified error.  Try again.'}, 500

@@ -134,3 +134,7 @@ class ExportISSNException(Exception):
 
 class BackupFileException(Exception):
     pass
+
+
+class FileOwnershipError(Exception):
+    pass
