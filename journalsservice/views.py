@@ -9,7 +9,7 @@ from dateutil import parser
 from journalsdb.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource, JournalsTitleHistory, JournalsNames
 from journalsservice.adsquery import ADSQuery
 import adsmutils
-from sqlalchemy import _or
+from sqlalchemy import or_
 
 def liken(text):
     text_out = re.sub(r'[. ]{1,}', '%', text)
@@ -79,10 +79,10 @@ class Journal(Resource):
                     rec_found = []
                     # search Abbreviations
                     dat_abbrev = session.query(JournalsAbbreviations).filter(JournalsAbbreviations.abbreviation.ilike(jname)).all()
-                    dat_names = session.query(JournalsNames).filter(_or(JournalsNames.name_english_translated.ilike(jname),
+                    dat_names = session.query(JournalsNames).filter(or_(JournalsNames.name_english_translated.ilike(jname),
                                                                         JournalsNames.name_native_language.ilike(jname),
                                                                         JournalsNames.name_normalized.ilike(jname))).all()
-                    dat_master = session.query(JournalsMaster).filter(_or(JournalsMaster.journal_name.ilike(jname),
+                    dat_master = session.query(JournalsMaster).filter(or_(JournalsMaster.journal_name.ilike(jname),
                                                                           JournalsMaster.bibstem.ilike(jname))).all()
                     rec_found.extend([rec.masterid for rec in dat_abbrev])
                     rec_found.extend([rec.masterid for rec in dat_names])
