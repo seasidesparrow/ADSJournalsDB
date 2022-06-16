@@ -30,7 +30,6 @@ class Summary(Resource):
                     dat_master = session.query(JournalsMaster).filter_by(bibstem=bibstem).first()
                     try:
                         masterid = dat_master.masterid
-                        
                     except Exception as err:
                         return {'Error': 'Search failed',
                                 'Error Info': 'Bibstem "%s" not found.' % bibstem}, 200
@@ -44,11 +43,10 @@ class Summary(Resource):
                             for t in dat_titlehist:
                                 publisherid = t.pop('publisherid', None)
                                 if publisherid:
-                                    pub = [rec.toJSON() for rec in session.query(JournalsPublisher).filter_by(publisherid=publisherid).all()]
-                                    pub_name = pub[0]['publisher'][0]['pubname']
-                                    pubhist = {'publisher': pub_name, 'title': t}
+                                    pub = session.query(JournalsPublisher).filter_by(publisherid=publisherid).first()
+                                    pubhist = {'publisher': pub.toJSON()['pubname'], 'title': t}
                                     dat_pubhist.append(pubhist)
-                        result_json = {'summary': 
+                        result_json = {'summary':
                                           {'master': dat_master.toJSON(),
                                            'idents': dat_idents,
                                            'abbrev': dat_abbrev,
@@ -56,7 +54,7 @@ class Summary(Resource):
                                            'names': dat_names
                                           }
                                       }
-    
+
                         return result_json, 200
             except Exception as err:
                 return {'Error': 'Summary search failed',
