@@ -6,9 +6,10 @@ from flask_restful import Resource
 from flask_discoverer import advertise
 from datetime import datetime
 from dateutil import parser
-from journalsdb.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource, JournalsTitleHistory
+from journalsdb.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource, JournalsTitleHistory, JournalsNames
 from journalsservice.adsquery import ADSQuery
 import adsmutils
+from sqlalchemy import _or
 
 def liken(text):
     text_out = re.sub(r'[. ]{1,}', '%', text)
@@ -36,20 +37,22 @@ class Summary(Resource):
                     else:
                         dat_abbrev = [rec.toJSON()['abbreviation'] for rec in session.query(JournalsAbbreviations).filter_by(masterid=masterid).all()]
                         dat_idents = [rec.toJSON() for rec in session.query(JournalsIdentifiers).filter_by(masterid=masterid).all()]
+                        dat_names = [rec.toJSON() for rec in session.query(JournalsNames).filter_by(masterid=masterid).all()]
                         dat_titlehist = [rec.toJSON() for rec in session.query(JournalsTitleHistory).filter_by(masterid=masterid).all()]
                         dat_pubhist = []
                         if dat_titlehist:
                             for t in dat_titlehist:
-                                publisherid = t.get('publisherid', None)
+                                publisherid = t.pop('publisherid', None)
                                 if publisherid:
                                     pub = [rec.toJSON() for rec in session.query(JournalsPublisher).filter_by(publisherid=publisherid).all()]
-                                    pubhist = {'publisher': pub, 'title': t}
+                                    pubhist = {'publisher': pub['pubname'], 'title': t}
                                     dat_pubhist.append(pubhist)
                         result_json = {'summary': 
                                           {'master': dat_master.toJSON(),
                                            'idents': dat_idents,
                                            'abbrev': dat_abbrev,
-                                           'pubhist': dat_pubhist
+                                           'pubhist': dat_pubhist,
+                                           'names': dat_names
                                           }
                                       }
     
@@ -73,8 +76,18 @@ class Journal(Resource):
             jname = liken(journalname)
             try:
                 with current_app.session_scope() as session:
+                    rec_found = []
+                    # search Abbreviations
                     dat_abbrev = session.query(JournalsAbbreviations).filter(JournalsAbbreviations.abbreviation.ilike(jname)).all()
-                    rec_found = list(set([rec.masterid for rec in dat_abbrev]))
+                    dat_names = session.query(JournalsNames).filter(_or(JournalsNames.name_english_translated.ilike(jname),
+                                                                        JournalsNames.name_native_language.ilike(jname),
+                                                                        JournalsNames.name_normalized.ilike(jname))).all()
+                    dat_master = session.query(JournalsMaster).filter(_or(JournalsMaster.journal_name.ilike(jname),
+                                                                          JournalsMaster.bibstem.ilike(jname))).all()
+                    rec_found.extend([rec.masterid for rec in dat_abbrev])
+                    rec_found.extend([rec.masterid for rec in dat_names])
+                    rec_found.extend([rec.masterid for rec in dat_master])
+                    rec_found = list(set(rec_found))
                     for mid in rec_found:
                         dat_master = session.query(JournalsMaster).filter_by(masterid=mid).first()
                         journal_list.append({"bibstem": dat_master.bibstem, "name": dat_master.journal_name})
