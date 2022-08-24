@@ -11,7 +11,7 @@ This service returns data from the journals database for selected queries.
 ## Summary endpoint
 
 Provides information about the journal/publication, common title spellings,
-selected identifiers, and current publisher information when a bibcode
+selected identifiers, and current publisher information when a bibstem
 is provided.
 
 Example:
@@ -52,7 +52,7 @@ curl 'http://api.adsabs.harvard.edu/v1/journals/Holdings/ApJ/880'
 
 ## Refsources endpoint
 
-Returns a list of where our references for a given Journal come from, if available.
+Returns a list of where our references for a given Journal (bibstem) come from, if available.
 
 Example:
 
