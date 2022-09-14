@@ -660,7 +660,7 @@ def task_update_table(checkin, masterdict):
 def task_export_autocomplete_data():
     try:
         with app.session_scope() as session:
-            result = session.query(master.bibstem, master.journal_name, names.name_english_translated, names.name_native_language, names.name_normalized).outerjoin(master, master.masterid == names.masterid).order_by(master.bibstem.asc()).all()
+            result = session.query(master.bibstem, master.journal_name, names.name_english_translated, names.name_native_language, names.name_normalized).outerjoin(names, master.masterid == names.masterid).order_by(master.bibstem.asc()).all()
             # result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.masterid.asc()).all()
             rows = []
             for r in result:
