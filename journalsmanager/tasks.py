@@ -654,3 +654,25 @@ def task_update_table(checkin, masterdict):
 
     except Exception as err:
         raise UpdateTableException(err)
+
+
+@app.task(queue='load-datafiles')
+def task_export_autocomplete_data():
+    try:
+        with app.session_scope() as session:
+            result = session.query(master.bibstem, master.journal_name, names.name_english_translated, names.name_native_language, names.name_normalized).outerjoin(names, master.masterid == names.masterid).order_by(master.bibstem.asc()).all()
+            # result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.masterid.asc()).all()
+            rows = []
+            for r in result:
+                rows.append({'bibstem': r[0], 'name': r[1],
+                             'translated_name': r[2],
+                             'native_name':r[3],
+                             'transliterated_name': r[4]})
+    except Exception as err:
+        logger.error("Failed to query autocomplete data from tables: %s" % err)
+    else:
+        try:
+            result_autocomplete = export_to_autocomplete(rows)
+        except Exception as err:
+            logger.error("Failed to export autocomplete data: %s" % err)
+
