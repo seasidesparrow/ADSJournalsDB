@@ -146,7 +146,7 @@ def export_to_autocomplete(rows):
     data = []
     try:
         for r in rows:
-            bibstem = r[bibstem]
+            bibstem = r['bibstem']
             names = list()
             names.append(r.get('name', None))
             names.append(r.get('translated_name', None))
