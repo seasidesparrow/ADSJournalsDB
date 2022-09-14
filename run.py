@@ -69,6 +69,13 @@ def get_arguments():
                         default=False,
                         help='Delete checked-in sheet from Google')
 
+    parser.add_argument('-ac',
+                        '--autocomplete-data',
+                        dest='autocomplete',
+                        action='store_true',
+                        default=False,
+                        help='Export journal name & bibstem data to json')
+
     args = parser.parse_args()
     return args
 
@@ -296,6 +303,9 @@ def main():
 
     elif args.dump_classic:
          tasks.task_export_classic_files()
+
+    elif args.autocomplete:
+         tasks.task_export_autocomplete_data()
 
     else:
         # These do require masterdict
