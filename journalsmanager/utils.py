@@ -163,7 +163,7 @@ def export_to_autocomplete(rows):
         result = {'data': data}
         bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
         with open(bib2name_file, 'w') as fo:
-            fo.write(json.dumps(result, indent=2))
+            fo.write(json.dumps(result))
     except Exception as err:
         raise AutocompleteExportException("Unable to export autocomplete json: %s" % err) 
             
