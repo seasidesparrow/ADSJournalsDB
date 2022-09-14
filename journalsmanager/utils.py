@@ -146,15 +146,17 @@ def export_to_autocomplete(rows):
     data = []
     try:
         for r in rows:
-            bibstem = r['bibstem']
+            bibstem = r.get('bibstem', None)
             names = list()
             names.append(r.get('name', None))
             names.append(r.get('translated_name', None))
             names.append(r.get('native_name', None))
             names.append(r.get('transliterated_name', None))
             for n in names:
-                if n:
+                if bibstem and n:
                     data.append({'value': bibstem, 'label': n})
+                else:
+                    print('what the hell? %s' % str(r))
         result = {'bibstem_journalname': data}
         bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
         with open(bib2name_file, 'w') as fo:
