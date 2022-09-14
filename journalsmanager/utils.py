@@ -160,7 +160,7 @@ def export_to_autocomplete(rows):
                 data.append({'value': bibstem, 'label': names})
             elif not bibstem:
                 print('what the hell? %s' % str(r))
-        result = {'bibstem_journalname': data}
+        result = {'data': data}
         bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
         with open(bib2name_file, 'w') as fo:
             fo.write(json.dumps(result, indent=2))
