@@ -663,10 +663,10 @@ def task_export_autocomplete_data():
             # result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.masterid.asc()).all()
             rows = []
             for r in result:
-                rows.append({'bibstem': r['bibstem'], 'name': r['name'],
-                             'translated_name': r['translated_name'],
-                             'native_name':r['native_name'],
-                             'transliterated_name': r['transliterated_name']})
+                rows.append({'bibstem': r[0], 'name': r[1],
+                             'translated_name': r[2],
+                             'native_name':r[3],
+                             'transliterated_name': r[4]})
     except Exception as err:
         logger.error("Failed to query autocomplete data from tables: %s" % err)
     else:
