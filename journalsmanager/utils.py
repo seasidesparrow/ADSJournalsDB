@@ -152,11 +152,11 @@ def export_to_autocomplete(rows):
             names.append(r.get('translated_name', None))
             names.append(r.get('native_name', None))
             names.append(r.get('transliterated_name', None))
-            for n in names:
-                if bibstem and n:
-                    data.append({'value': bibstem, 'label': n})
-                elif not bibstem:
-                    print('what the hell? %s' % str(r))
+            filter(None, names)
+            if bibstem and names:
+                data.append({'value': bibstem, 'label': names})
+            elif not bibstem:
+                print('what the hell? %s' % str(r))
         result = {'bibstem_journalname': data}
         bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
         with open(bib2name_file, 'w') as fo:
