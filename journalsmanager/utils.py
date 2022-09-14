@@ -2,6 +2,7 @@ from __future__ import print_function
 import chardet
 import csv
 import grp
+import json
 import pwd
 import os
 import requests
@@ -141,6 +142,26 @@ def export_issns(rows):
         else:
             return "Success: %s rows exported." % nrows
     
+def export_to_autocomplete(rows):
+    data = []
+    try:
+        for r in rows:
+            bibstem = r[bibstem]
+            names = list()
+            names.append(r.get('name', None))
+            names.append(r.get('translated_name', None))
+            names.append(r.get('native_name', None))
+            names.append(r.get('transliterated_name', None))
+            for n in names:
+                if n:
+                    data.append({'value': bibstem, 'label': n})
+        result = {'bibstem_journalname': data}
+        bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
+        with open(bib2name_file, 'w') as fo:
+            fo.write(json.dumps(result))
+    except Exception as err:
+        raise AutocompleteExportException("Unable to export autocomplete json: %s" % err) 
+            
 
 
 def read_abbreviations_list():
