@@ -148,11 +148,14 @@ def export_to_autocomplete(rows):
         for r in rows:
             bibstem = r.get('bibstem', None)
             names = list()
-            names.append(r.get('name', None))
-            names.append(r.get('translated_name', None))
-            names.append(r.get('native_name', None))
-            names.append(r.get('transliterated_name', None))
-            filter(None, names)
+            if r.get('name', None):
+                names.append(r.get('name', None))
+            if r.get('translated_name', None):
+                names.append(r.get('translated_name', None))
+            if r.get('native_name', None):
+                names.append(r.get('native_name', None))
+            if r.get('transliterated_name', None):
+                names.append(r.get('transliterated_name', None))
             if bibstem and names:
                 data.append({'value': bibstem, 'label': names})
             elif not bibstem:
