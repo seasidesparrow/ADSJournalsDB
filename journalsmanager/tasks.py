@@ -655,6 +655,7 @@ def task_update_table(checkin, masterdict):
     except Exception as err:
         raise UpdateTableException(err)
 
+
 @app.task(queue='load-datafiles')
 def task_export_autocomplete_data():
     try:
@@ -670,6 +671,7 @@ def task_export_autocomplete_data():
     except Exception as err:
         logger.error("Failed to query autocomplete data from tables: %s" % err)
     else:
+        logger.warning("lol: %s" % str(rows[0:5]))
         try:
             result_autocomplete = export_to_autocomplete(rows)
         except Exception as err:
