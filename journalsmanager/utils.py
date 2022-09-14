@@ -155,7 +155,7 @@ def export_to_autocomplete(rows):
             for n in names:
                 if bibstem and n:
                     data.append({'value': bibstem, 'label': n})
-                else:
+                elif not bibstem:
                     print('what the hell? %s' % str(r))
         result = {'bibstem_journalname': data}
         bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
