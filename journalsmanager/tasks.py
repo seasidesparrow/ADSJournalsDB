@@ -660,7 +660,7 @@ def task_update_table(checkin, masterdict):
 def task_export_autocomplete_data():
     try:
         with app.session_scope() as session:
-            result = session.query(master.bibstem, master.journal_name, names.name_english_translated, names.name_native_language, names.name_normalized).outerjoin(master, names.masterid == master.masterid).order_by(master.bibstem.asc()).all()
+            result = session.query(master.bibstem, master.journal_name, names.name_english_translated, names.name_native_language, names.name_normalized).outerjoin(master, master.masterid == names.masterid).order_by(master.bibstem.asc()).all()
             # result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.masterid.asc()).all()
             rows = []
             for r in result:
@@ -671,7 +671,7 @@ def task_export_autocomplete_data():
     except Exception as err:
         logger.error("Failed to query autocomplete data from tables: %s" % err)
     else:
-        logger.warning("lol: %s" % str(rows[0:5]))
+        logger.warning("lol: %s" % str(rows[0:10]))
         try:
             result_autocomplete = export_to_autocomplete(rows)
         except Exception as err:
