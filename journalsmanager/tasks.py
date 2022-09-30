@@ -676,3 +676,46 @@ def task_export_autocomplete_data():
         except Exception as err:
             logger.error("Failed to export autocomplete data: %s" % err)
 
+
+@app.task(queue='load-datafiles')
+def task_revert_editid(idno):
+    try:
+        with app.session_scope() as session:
+            result = session.query(editcontrol.editid, editcontrol.editstatus, editcontrol.tablename).filter_by(editid=idno).all()
+        if len(result) == 0:
+            raise RevertException("History id %s does not exist" % idno)
+        elif len(result) > 1:
+            raise RevertException("Multiple revisions (%s) with id %s!" % (len(result), idno))
+        elif len(result) == 1:
+            # you will read from tablename_hist and write to tablename
+            tablename = result[0][2]
+            tablehist = tablename + '_hist'
+            t = TABLES[tablename]
+            th = TABLES[tablehist]
+            tk = TABLE_UNIQID[tablename]
+            tkeys = t.__table__.columns.keys()
+            with app.session_scope() as session:
+                reversions = session.query(th).filter_by(editid=idno).all()
+                for r in reversions:
+                    keyval = r.get(tk, -1)
+                    d = session.query(t).filter(t.__table__.c[tk]==keyval).first()
+                    for k, v in r.items():
+                        if k != tk and v != getattr(d,k):
+                            setattr(d,k,v)
+                    try:
+                        session.commit()
+                    except Exception as err:
+                        session.rollback()
+                        session.flush()
+                        logger.warn("Could not revert row:", err)
+        else:
+            raise RevertException("There wasn't any data to revert for history id %s!" % idno)
+        try:
+            task_setstatus(idno, 'reverted')
+        except Exception as err:
+            raise DBCommitException("Could not update editstatus: %s" % err)
+        else:
+            logger.info("Revision %s in editcontrol has been reverted" % idno)
+    except Exception as err:
+        logger.error("Failed to fully revert %s in editcontrol: %s" % (idno, err))
+
