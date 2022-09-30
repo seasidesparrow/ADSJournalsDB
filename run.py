@@ -76,6 +76,13 @@ def get_arguments():
                         default=False,
                         help='Export journal name & bibstem data to json')
 
+    parser.add_argument('-re',
+                        '--revert-edit',
+                        dest='revertid',
+                        action='store',
+                        default=None,
+                        help='Undo edit # from editcontrol')
+
     args = parser.parse_args()
     return args
 
@@ -302,10 +309,13 @@ def main():
         checkout_table(args.checkout_table)
 
     elif args.dump_classic:
-         tasks.task_export_classic_files()
+        tasks.task_export_classic_files()
 
     elif args.autocomplete:
-         tasks.task_export_autocomplete_data()
+        tasks.task_export_autocomplete_data()
+
+    elif args.revertid:
+        tasks.task_revert_editid(args.revertid)
 
     else:
         # These do require masterdict
