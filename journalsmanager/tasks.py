@@ -681,7 +681,7 @@ def task_export_autocomplete_data():
 def task_revert_editid(idno):
     try:
         with app.session_scope() as session:
-            result = session.query(editcontrol.editid, editcontrol.editstatus, editcontrol.tablename).filter_by(editid=idno).all()
+            result = session.query(editctrl.editid, editctrl.editstatus, editctrl.tablename).filter_by(editid=idno).all()
         if len(result) == 0:
             raise RevertException("History id %s does not exist" % idno)
         elif len(result) > 1:
@@ -693,29 +693,46 @@ def task_revert_editid(idno):
             t = TABLES[tablename]
             th = TABLES[tablehist]
             tk = TABLE_UNIQID[tablename]
-            tkeys = t.__table__.columns.keys()
             with app.session_scope() as session:
-                reversions = session.query(th).filter_by(editid=idno).all()
-                for r in reversions:
-                    keyval = r.get(tk, -1)
-                    d = session.query(t).filter(t.__table__.c[tk]==keyval).first()
-                    for k, v in r.items():
-                        if k != tk and v != getattr(d,k):
-                            setattr(d,k,v)
+                revert_data = session.query(th).filter_by(editid=idno).all()
+                for r in revert_data:
+                    uid = getattr(r,tk)
+                    d = session.query(t).filter(t.__table__.c[tk]==uid).first()
+                    for k in d.__table__.columns.keys():
+                        dnew = getattr(r,k)
+                        setattr(d,k,dnew)
                     try:
                         session.commit()
                     except Exception as err:
                         session.rollback()
-                        session.flush()
-                        logger.warn("Could not revert row:", err)
-        else:
-            raise RevertException("There wasn't any data to revert for history id %s!" % idno)
+                        logger.warning("Unable to rollback editid %s, record %s: %s" % (idno, uid, err))
+
+    except Exception as err:
+        raise RevertEditHistoryException(err)
+    else:
         try:
             task_setstatus(idno, 'reverted')
         except Exception as err:
             raise DBCommitException("Could not update editstatus: %s" % err)
         else:
             logger.info("Revision %s in editcontrol has been reverted" % idno)
-    except Exception as err:
-        logger.error("Failed to fully revert %s in editcontrol: %s" % (idno, err))
 
+def task_cancel_checkout(idno):
+    try:
+        status='cancelled'
+        task_setstatus(idno, status)
+        logger.info("Cancelled checkout editctrl.edit %s" % idno)
+    except Exception as err:
+        raise CancelCheckoutException("Could not cancel checkout %s: %s" % (idno, err))
+
+
+def task_abandon_active_checkouts():
+    try:
+        with app.session_scope() as session:
+            table_record = session.query(editctrl.editid).filter(editctrl.editstatus=='active').all()
+            for t in table_record:
+                idno = getattr(t, 'editid')
+                task_setstatus(idno, 'cancelled')
+                logger.info("Cancelled checkout editctrl.edit %s" % idno)
+    except Exception as err:
+        raise AbandonCheckoutsException("Problem cancelling active checkouts: %s" % err)
