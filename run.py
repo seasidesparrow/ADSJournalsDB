@@ -76,6 +76,27 @@ def get_arguments():
                         default=False,
                         help='Export journal name & bibstem data to json')
 
+    parser.add_argument('-re',
+                        '--revert-edit',
+                        dest='revertid',
+                        action='store',
+                        default=None,
+                        help='Undo edit # from editcontrol')
+
+    parser.add_argument('-cc',
+                        '--cancel-checkout',
+                        dest='cancelxo',
+                        action='store',
+                        default=None,
+                        help='Cancel active export id # from editcontrol')
+
+    parser.add_argument('-aa',
+                        '--abandon-all',
+                        dest='abandonall',
+                        action='store_true',
+                        default=False,
+                        help='Abandon all active sheet exports (use with caution -- this will abort **ALL** sheets currently being edited!)')
+
     args = parser.parse_args()
     return args
 
@@ -298,14 +319,23 @@ def main():
     if args.load_full:
         load_full_database()
 
+    elif args.abandonall:
+        tasks.task_abandon_active_checkouts()
+
     elif args.checkout_table:
         checkout_table(args.checkout_table)
 
     elif args.dump_classic:
-         tasks.task_export_classic_files()
+        tasks.task_export_classic_files()
 
     elif args.autocomplete:
-         tasks.task_export_autocomplete_data()
+        tasks.task_export_autocomplete_data()
+
+    elif args.revertid:
+        tasks.task_revert_editid(args.revertid)
+
+    elif args.cancelxo:
+        tasks.task_cancel_checkout(args.cancelxo)
 
     else:
         # These do require masterdict
