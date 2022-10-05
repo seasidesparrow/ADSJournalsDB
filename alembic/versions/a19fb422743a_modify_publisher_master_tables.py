@@ -26,13 +26,21 @@ def upgrade():
 
     for table in ['master', 'master_hist']:
         with op.batch_alter_table(table) as batch_op:
-            batch_op.add_column(sa.Column('completeness_fraction', sa.String()))
+            batch_op.alter_column(column_name='complete', new_column_name='completeness_fraction')
+
+    for table in ['titlehistory', 'titlehistory_hist']:
+        with op.batch_alter_table(table) as batch_op:
+            batch_op.alter_column(column_name='complete', new_column_name='completeness_details')
 
 def downgrade():
 
+    for table in ['titlehistory', 'titlehistory_hist']:
+        with op.batch_alter_table(table) as batch_op:
+            batch_op.alter_column(column_name='completeness_details', new_column_name='complete')
+
     for table in ['master', 'master_hist']:
         with op.batch_alter_table(table) as batch_op:
-            batch_op.drop_column('completeness_fraction')
+            batch_op.alter_column(column_name='completeness_fraction', new_column_name='complete')
 
     for table in ['publisher', 'publisher_hist']:
         with op.batch_alter_table(table) as batch_op:

@@ -185,7 +185,7 @@ def task_db_load_titlehist(recs):
                                              year_start=r[1],
                                              vol_start=r[2],
                                              vol_end=r[3],
-                                             complete=r[4],
+                                             completeness_details=r[4],
                                              publisherid=r[5],
                                              notes=r[6]))
                     session.commit()
@@ -388,9 +388,9 @@ def task_export_table_data(tablename, results):
             data = io.StringIO()
             csvout = csv.writer(data, quoting=csv.QUOTE_NONNUMERIC)
             if tablename == 'master':
-                csvout.writerow(('masterid','bibstem','journal_name','primary_language','multilingual','defunct','pubtype','refereed','collection','notes','not_indexed'))
+                csvout.writerow(('masterid','bibstem','journal_name','primary_language','multilingual','defunct','pubtype','refereed','collection','completeness_fraction','notes','not_indexed'))
                 if not results:
-                    results = session.query(master.masterid, master.bibstem, master.journal_name, master.primary_language, master.multilingual, master.defunct, master.pubtype, master.refereed, master.collection, master.notes, master.not_indexed).order_by(master.masterid.asc()).all()
+                    results = session.query(master.masterid, master.bibstem, master.journal_name, master.primary_language, master.multilingual, master.defunct, master.pubtype, master.refereed, master.collection, master.completeness_fraction, master.notes, master.not_indexed).order_by(master.masterid.asc()).all()
 
             elif tablename == 'names':
                 csvout.writerow(('nameid','masterid','bibstem','name_english_translated','title_language','name_native_language','name_normalized'))
@@ -413,9 +413,9 @@ def task_export_table_data(tablename, results):
                     results = session.query(publisher.publisherid, publisher.pubabbrev, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.pubfullname, publisher.notes).order_by(publisher.publisherid.asc()).all()
 
             elif tablename == 'titlehistory':
-                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','complete','publisherid','successor_masterid','notes'))
+                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','completeness_details','publisherid','successor_masterid','notes'))
                 if not results:
-                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.complete, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
+                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.completeness_details, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
 
             else:
                 results = []

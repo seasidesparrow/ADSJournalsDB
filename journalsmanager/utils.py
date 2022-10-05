@@ -231,7 +231,7 @@ def read_complete_csvs():
                                                  'startyear': l[4],
                                                  'startvol': l[5],
                                                  'endvol': l[6],
-                                                 'complete': l[7],
+                                                 'completeness_frac': l[7],
                                                  'comporig': l[8],
                                                  'publisher': l[9],
                                                  'scanned': l[10],

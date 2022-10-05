@@ -253,7 +253,7 @@ class JournalsTitleHistory(Base):
     year_end = Column(Integer)
     vol_start = Column(String)
     vol_end = Column(String)
-    complete = Column(Text)
+    completeness_details = Column(Text)
     publisherid = Column(Integer, ForeignKey('publisher.publisherid'))
     successor_masterid = Column(Integer)
     notes = Column(Text)
@@ -268,7 +268,7 @@ class JournalsTitleHistory(Base):
                 'year_end': self.year_end,
                 'vol_start': self.vol_start,
                 'vol_end': self.vol_end,
-                'complete': self.complete,
+                'completeness_details': self.completeness_details,
                 'publisherid': self.publisherid,
                 'successor_masterid': self.successor_masterid,
                 'notes': self.notes}
@@ -285,7 +285,7 @@ class JournalsTitleHistoryHistory(Base):
     year_end = Column(Integer)
     vol_start = Column(String)
     vol_end = Column(String)
-    complete = Column(Text)
+    completeness_details = Column(Text)
     publisherid = Column(Integer)
     successor_masterid = Column(Integer)
     notes = Column(Text)
