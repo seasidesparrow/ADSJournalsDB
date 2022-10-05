@@ -194,11 +194,12 @@ class JournalsPublisher(Base):
 
     publisherid = Column(Integer, primary_key=True, autoincrement=True,
                          unique=True, nullable=False)
-    pubname = Column(String)
+    pubabbrev = Column(String)
     pubaddress = Column(String)
     pubcontact = Column(Text)
     puburl = Column(String)
     pubextid = Column(String)
+    pubfullname = Column(String)
     notes = Column(Text)
     created = Column(UTCDateTime, default=get_date)
     updated = Column(UTCDateTime, onupdate=get_date)
@@ -208,11 +209,12 @@ class JournalsPublisher(Base):
 
     def toJSON(self):
         return {'publisherid': self.publisherid,
-                'pubname': self.pubname,
+                'pubabbrev': self.pubname,
                 'pubaddress': self.pubaddress,
                 'pubcontact': self.pubcontact,
                 'puburl': self.puburl,
                 'pubextid': self.pubextid,
+                'pubfullname': self.pubfullname,
                 'notes': self.notes}
 
 class JournalsPublisherHistory(Base):
@@ -221,11 +223,12 @@ class JournalsPublisherHistory(Base):
     histid = Column(Integer, primary_key=True, unique=True)
     editid = Column(Integer)
     publisherid = Column(Integer)
-    pubname = Column(String)
+    pubabbrev = Column(String)
     pubaddress = Column(String)
     pubcontact = Column(Text)
     puburl = Column(String)
     pubextid = Column(String)
+    pubfullname = Column(String)
     notes = Column(Text)
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)

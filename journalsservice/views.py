@@ -44,7 +44,7 @@ class Summary(Resource):
                                 publisherid = t.pop('publisherid', None)
                                 if publisherid:
                                     pub = session.query(JournalsPublisher).filter_by(publisherid=publisherid).first()
-                                    pubhist = {'publisher': pub.toJSON()['pubname'], 'title': t}
+                                    pubhist = {'publisher': pub.toJSON()['pubabbrev'], 'title': t}
                                     dat_pubhist.append(pubhist)
                         result_json = {'summary':
                                           {'master': dat_master.toJSON(),

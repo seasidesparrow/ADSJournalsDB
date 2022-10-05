@@ -117,8 +117,8 @@ def task_export_classic_files():
         result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.masterid.asc()).all()
         rows = []
         for r in result:
-            (bibstem,pubtype,refereed,pubname) = r
-            rows.append({'bibstem': bibstem, 'pubtype': pubtype, 'refereed': refereed, 'pubname':pubname})
+            (bibstem,pubtype,refereed,pubabbrev) = r
+            rows.append({'bibstem': bibstem, 'pubtype': pubtype, 'refereed': refereed, 'pubabbrev':pubabbrev})
         try:
             result_bibstems = export_to_bibstemsdat(rows)
         except Exception as err:
@@ -204,7 +204,7 @@ def task_db_load_publisher(recs):
         if recs:
             for r in recs:
                 try:
-                    session.add(publisher(pubname=r))
+                    session.add(publisher(pubabbrev=r))
                     session.commit()
                 except Exception as err:
                     logger.debug("Problem loading publisher: %s,%s" % (r, err))
@@ -312,8 +312,8 @@ def task_db_get_publisherid():
     with app.session_scope() as session:
         try:
             for record in session.query(publisher.publisherid,
-                                        publisher.pubname):
-                dictionary[publisher.pubname] = publisher.publisherid
+                                        publisher.pubabbrev):
+                dictionary[publisher.pubabbrev] = publisher.publisherid
         except Exception as err:
             logger.error("Failed to read publisher-publisherid dict from table publisher")
             raise DBReadException("Could not read from publisher: %s" % err)
@@ -408,9 +408,9 @@ def task_export_table_data(tablename, results):
                     results = session.query(abbrevs.abbrevid, abbrevs.masterid, master.bibstem, abbrevs.abbreviation).join(master, abbrevs.masterid == master.masterid).order_by(abbrevs.masterid.asc()).all()
 
             elif tablename == 'publisher':
-                csvout.writerow(('publisherid','pubname','pubaddress','pubcontact','puburl','pubextid','notes'))
+                csvout.writerow(('publisherid','pubabbrev','pubaddress','pubcontact','puburl','pubextid','pubfullname', 'notes'))
                 if not results:
-                    results = session.query(publisher.publisherid, publisher.pubname, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.notes).order_by(publisher.publisherid.asc()).all()
+                    results = session.query(publisher.publisherid, publisher.pubabbrev, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.pubfullname, publisher.notes).order_by(publisher.publisherid.asc()).all()
 
             elif tablename == 'titlehistory':
                 csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','complete','publisherid','successor_masterid','notes'))
