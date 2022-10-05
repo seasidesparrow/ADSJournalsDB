@@ -26,6 +26,7 @@ class JournalsMaster(Base):
     pubtype = Column(pub_type, nullable=False)
     refereed = Column(ref_status, nullable=False)
     collection = Column(String, nullable=True)
+    completeness_fraction = Column(String, nullable=True)
     notes = Column(Text)
     not_indexed = Column(Boolean, default=False)
     created = Column(UTCDateTime, default=get_date)
@@ -43,6 +44,7 @@ class JournalsMaster(Base):
                 'pubtype': self.pubtype,
                 'refereed': self.refereed,
                 'collection': self.collection,
+                'completeness_fraction': self.completeness_fraction,
                 'notes': self.notes,
                 'not_indexed': self.not_indexed}
 
@@ -62,6 +64,7 @@ class JournalsMasterHistory(Base):
     pubtype = Column(String)
     refereed = Column(String)
     collection = Column(String)
+    completeness_fraction = Column(String)
     notes = Column(Text)
     not_indexed = Column(Boolean)
     created = Column(UTCDateTime)

@@ -1,4 +1,4 @@
-"""modify publisher table
+"""modify publisher master tables
 
 Revision ID: a19fb422743a
 Revises: a476d887b4e1
@@ -18,12 +18,22 @@ depends_on = None
 
 
 def upgrade():
+
     for table in ['publisher', 'publisher_hist']:
         with op.batch_alter_table(table) as batch_op:
             batch_op.alter_column(column_name='pubname', new_column_name='pubabbrev')
-            batch_op.add_column('pubfullname', insert_after='pubextid')
+            batch_op.add_column(sa.Column('pubfullname', sa.String()))
+
+    for table in ['master', 'master_hist']:
+        with op.batch_alter_table(table) as batch_op:
+            batch_op.add_column(sa.Column('completeness_fraction', sa.String()))
 
 def downgrade():
+
+    for table in ['master', 'master_hist']:
+        with op.batch_alter_table(table) as batch_op:
+            batch_op.drop_column('completeness_fraction')
+
     for table in ['publisher', 'publisher_hist']:
         with op.batch_alter_table(table) as batch_op:
             batch_op.drop_column('pubfullname')
