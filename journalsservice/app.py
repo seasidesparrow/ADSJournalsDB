@@ -20,10 +20,10 @@ def create_app(**config):
     app.url_map.strict_slashes = False
 
     api = Api(app)
-    api.add_resource(Summary, '/Summary/<string:bibstem>')
-    api.add_resource(Journal, '/Journal/<string:journalname>')
-    api.add_resource(Holdings, '/Holdings/<string:bibstem>/<string:volume>')
-    api.add_resource(Refsource, '/Refsource/<string:bibstem>')
+    api.add_resource(Summary, '/summary/<string:bibstem>')
+    api.add_resource(Journal, '/journal/<string:journalname>')
+    api.add_resource(Holdings, '/holdings/<string:bibstem>/<string:volume>')
+    api.add_resource(Refsource, '/refsource/<string:bibstem>')
 
     discoverer = Discoverer(app)
 
