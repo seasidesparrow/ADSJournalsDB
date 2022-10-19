@@ -114,7 +114,7 @@ def task_export_classic_files():
 
     # bibstems
     with app.session_scope() as session:
-        result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.masterid.asc()).all()
+        result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.bibstem.asc()).all()
         rows = []
         for r in result:
             (bibstem,pubtype,refereed,pubabbrev) = r
