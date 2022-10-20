@@ -212,7 +212,7 @@ class JournalsPublisher(Base):
 
     def toJSON(self):
         return {'publisherid': self.publisherid,
-                'pubabbrev': self.pubname,
+                'pubabbrev': self.pubabbrev,
                 'pubaddress': self.pubaddress,
                 'pubcontact': self.pubcontact,
                 'puburl': self.puburl,
