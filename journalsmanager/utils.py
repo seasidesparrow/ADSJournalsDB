@@ -111,7 +111,7 @@ def export_to_bibstemsdat(rows):
                         f.write("%s\t%s\t%s\n" % (out_bibstem, out_type, r['pubname']))
                     except Exception as err:
                         f.close()
-                        raise ExportBibstemsException(err+str(r))
+                        raise ExportBibstemsException(err+': '+str(r))
             os.chmod(outfile, 0o444)
             chowner(outfile)
             return "Success: %s rows exported." % nrows
