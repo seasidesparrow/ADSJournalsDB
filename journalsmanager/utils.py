@@ -141,7 +141,7 @@ def export_issns(rows):
             raise ExportISSNException(err)
         else:
             return "Success: %s rows exported." % nrows
-    
+
 def export_to_autocomplete(rows):
     data = []
     try:
@@ -165,8 +165,7 @@ def export_to_autocomplete(rows):
         with open(bib2name_file, 'w') as fo:
             fo.write(json.dumps(result))
     except Exception as err:
-        raise AutocompleteExportException("Unable to export autocomplete json: %s" % err) 
-            
+        raise AutocompleteExportException("Unable to export autocomplete json: %s" % err)
 
 
 def read_abbreviations_list():
@@ -231,7 +230,7 @@ def read_complete_csvs():
                                                  'startyear': l[4],
                                                  'startvol': l[5],
                                                  'endvol': l[6],
-                                                 'complete': l[7],
+                                                 'completeness_frac': l[7],
                                                  'comporig': l[8],
                                                  'publisher': l[9],
                                                  'scanned': l[10],

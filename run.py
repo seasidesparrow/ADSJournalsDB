@@ -169,7 +169,7 @@ def load_abbreviations(masterdict):
 
 def load_completeness(masterdict):
     '''
-    Completeness loads multiple tables: publisher, idents, status
+    Completeness loads multiple tables: publisher, idents, titlehistory
     '''
     pub_dict = utils.read_complete_csvs()
     recsp = []
@@ -205,10 +205,10 @@ def load_completeness(masterdict):
             year_start = value.get('startyear', None)
             vol_start = value.get('startvol', None)
             vol_end = value.get('endvol', None)
-            complete = value.get('complete', None)
+            completeness_fraction = value.get('completeness_fraction', None)
             url = value.get('url', None)
             notes = '; '.join([value.get('notes', None), url]).strip('; ')
-            recsh.append((mid,year_start,vol_start,vol_end,complete,pid,notes))
+            recsh.append((mid,year_start,vol_start,vol_end,completeness_fraction,pid,notes))
     if recsh:
         tasks.task_db_load_titlehist(recsh)
 

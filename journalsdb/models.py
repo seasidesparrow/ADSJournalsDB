@@ -26,6 +26,7 @@ class JournalsMaster(Base):
     pubtype = Column(pub_type, nullable=False)
     refereed = Column(ref_status, nullable=False)
     collection = Column(String, nullable=True)
+    completeness_fraction = Column(String, nullable=True)
     notes = Column(Text)
     not_indexed = Column(Boolean, default=False)
     created = Column(UTCDateTime, default=get_date)
@@ -43,6 +44,7 @@ class JournalsMaster(Base):
                 'pubtype': self.pubtype,
                 'refereed': self.refereed,
                 'collection': self.collection,
+                'completeness_fraction': self.completeness_fraction,
                 'notes': self.notes,
                 'not_indexed': self.not_indexed}
 
@@ -62,6 +64,7 @@ class JournalsMasterHistory(Base):
     pubtype = Column(String)
     refereed = Column(String)
     collection = Column(String)
+    completeness_fraction = Column(String)
     notes = Column(Text)
     not_indexed = Column(Boolean)
     created = Column(UTCDateTime)
@@ -194,11 +197,12 @@ class JournalsPublisher(Base):
 
     publisherid = Column(Integer, primary_key=True, autoincrement=True,
                          unique=True, nullable=False)
-    pubname = Column(String)
+    pubabbrev = Column(String)
     pubaddress = Column(String)
     pubcontact = Column(Text)
     puburl = Column(String)
     pubextid = Column(String)
+    pubfullname = Column(String)
     notes = Column(Text)
     created = Column(UTCDateTime, default=get_date)
     updated = Column(UTCDateTime, onupdate=get_date)
@@ -208,11 +212,12 @@ class JournalsPublisher(Base):
 
     def toJSON(self):
         return {'publisherid': self.publisherid,
-                'pubname': self.pubname,
+                'pubabbrev': self.pubabbrev,
                 'pubaddress': self.pubaddress,
                 'pubcontact': self.pubcontact,
                 'puburl': self.puburl,
                 'pubextid': self.pubextid,
+                'pubfullname': self.pubfullname,
                 'notes': self.notes}
 
 class JournalsPublisherHistory(Base):
@@ -221,11 +226,12 @@ class JournalsPublisherHistory(Base):
     histid = Column(Integer, primary_key=True, unique=True)
     editid = Column(Integer)
     publisherid = Column(Integer)
-    pubname = Column(String)
+    pubabbrev = Column(String)
     pubaddress = Column(String)
     pubcontact = Column(Text)
     puburl = Column(String)
     pubextid = Column(String)
+    pubfullname = Column(String)
     notes = Column(Text)
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
@@ -247,7 +253,7 @@ class JournalsTitleHistory(Base):
     year_end = Column(Integer)
     vol_start = Column(String)
     vol_end = Column(String)
-    complete = Column(Text)
+    completeness_details = Column(Text)
     publisherid = Column(Integer, ForeignKey('publisher.publisherid'))
     successor_masterid = Column(Integer)
     notes = Column(Text)
@@ -262,7 +268,7 @@ class JournalsTitleHistory(Base):
                 'year_end': self.year_end,
                 'vol_start': self.vol_start,
                 'vol_end': self.vol_end,
-                'complete': self.complete,
+                'completeness_details': self.completeness_details,
                 'publisherid': self.publisherid,
                 'successor_masterid': self.successor_masterid,
                 'notes': self.notes}
@@ -279,7 +285,7 @@ class JournalsTitleHistoryHistory(Base):
     year_end = Column(Integer)
     vol_start = Column(String)
     vol_end = Column(String)
-    complete = Column(Text)
+    completeness_details = Column(Text)
     publisherid = Column(Integer)
     successor_masterid = Column(Integer)
     notes = Column(Text)
