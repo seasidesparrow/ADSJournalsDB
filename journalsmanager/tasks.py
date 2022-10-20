@@ -117,8 +117,8 @@ def task_export_classic_files():
         result = session.query(master.bibstem,master.pubtype,master.refereed,master.journal_name).filter_by(not_indexed=False).order_by(master.bibstem.asc()).all()
         rows = []
         for r in result:
-            (bibstem,pubtype,refereed,pubabbrev) = r
-            rows.append({'bibstem': bibstem, 'pubtype': pubtype, 'refereed': refereed, 'pubabbrev':pubabbrev})
+            (bibstem,pubtype,refereed,journal_name) = r
+            rows.append({'bibstem': bibstem, 'pubtype': pubtype, 'refereed': refereed, 'pubname':journal_name})
         try:
             result_bibstems = export_to_bibstemsdat(rows)
         except Exception as err:

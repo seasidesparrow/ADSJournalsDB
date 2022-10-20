@@ -111,7 +111,7 @@ def export_to_bibstemsdat(rows):
                         f.write("%s\t%s\t%s\n" % (out_bibstem, out_type, r['pubname']))
                     except Exception as err:
                         f.close()
-                        raise ExportBibstemsException(err+': '+str(r))
+                        raise ExportBibstemsException(err+str(r))
             os.chmod(outfile, 0o444)
             chowner(outfile)
             return "Success: %s rows exported." % nrows
@@ -141,7 +141,7 @@ def export_issns(rows):
             raise ExportISSNException(err)
         else:
             return "Success: %s rows exported." % nrows
-    
+
 def export_to_autocomplete(rows):
     data = []
     try:
@@ -165,8 +165,7 @@ def export_to_autocomplete(rows):
         with open(bib2name_file, 'w') as fo:
             fo.write(json.dumps(result))
     except Exception as err:
-        raise AutocompleteExportException("Unable to export autocomplete json: %s" % err) 
-            
+        raise AutocompleteExportException("Unable to export autocomplete json: %s" % err)
 
 
 def read_abbreviations_list():
