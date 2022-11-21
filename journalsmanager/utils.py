@@ -166,6 +166,8 @@ def export_to_autocomplete(rows):
                         cites[bibcode] = (int(tcit) + int(rcit))
         for r in rows:
             bibstem = r.get('bibstem', None)
+            if len(bibstem) < 5:
+                bibstem = bibstem.ljust(5, '.')
             names = list()
             bibcodeList = [c for c in canonicalBibs if bibstem in c]
             bibcodeCount = len(bibcodeList)
