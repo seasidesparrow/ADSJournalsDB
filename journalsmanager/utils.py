@@ -12,6 +12,7 @@ import urllib3
 from adsputils import load_config
 from bs4 import BeautifulSoup as bs
 from glob import glob
+from operator import itemgetter
 from journalsmanager.exceptions import *
 from journalsmanager.refsource import RefCount, RefVolume, RefSource
 
@@ -145,21 +146,45 @@ def export_issns(rows):
 def export_to_autocomplete(rows):
     data = []
     try:
+        canonicalBibs = []
+        bibcodeFile = config.get('CANONICAL_BIBS', None)
+        if bibcodeFile:
+            bibcodeFile = JDB_DATA_DIR + '/' + bibcodeFile
+            with open(bibcodeFile, 'r') as fb:
+                for l in fb.readlines():
+                    canonicalBibs.append(l.strip())
+        cites = {}
+        citationFile = config.get('CITATION_COUNTS', None)
+        if citationFile:
+            citationFile = JDB_DATA_DIR + '/' + citationFile
+            with open(citationFile, 'r') as fc:
+                for l in fc.readlines():
+                    (bibcode, tcit, rcit) = l.strip().split('\t')
+                    if cites.get(bibcode, None):
+                        cites[bibcode] += (int(tcit) + int(rcit))
+                    else:
+                        cites[bibcode] = (int(tcit) + int(rcit))
         for r in rows:
             bibstem = r.get('bibstem', None)
             names = list()
-            if r.get('name', None):
-                names.append(r.get('name', None))
-            if r.get('translated_name', None):
-                names.append(r.get('translated_name', None))
-            if r.get('native_name', None):
-                names.append(r.get('native_name', None))
-            if r.get('transliterated_name', None):
-                names.append(r.get('transliterated_name', None))
-            if bibstem and names:
-                data.append({'value': bibstem, 'label': names})
-            elif not bibstem:
-                print('what the hell? %s' % str(r))
+            bibcodeList = [c for c in canonicalBibs if b in c]
+            bibcodeCount = len(bibcodeList)
+            if bibcodeCount > 0:
+                citeSum = sum(cites.get(x, 0) for x in bibcodeList)
+                rank = bibcodeCount + citeSum
+                if r.get('name', None):
+                    names.append(r.get('name', None))
+                if r.get('translated_name', None):
+                    names.append(r.get('translated_name', None))
+                if r.get('native_name', None):
+                    names.append(r.get('native_name', None))
+                if r.get('transliterated_name', None):
+                    names.append(r.get('transliterated_name', None))
+                if bibstem and names:
+                    data.append({'value': bibstem, 'label': names, 'rank': rank})
+        if data:
+            sorted_data = sorted(data, key=itemgetter('rank'), reverse=True)
+            data = sorted_data
         result = {'data': data}
         bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
         with open(bib2name_file, 'w') as fo:
@@ -474,3 +499,5 @@ def backup_export_file(filepath, maxcount=3):
         raise BackupFileException(err)
 
     return
+
+
