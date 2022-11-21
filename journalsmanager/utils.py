@@ -167,7 +167,7 @@ def export_to_autocomplete(rows):
         for r in rows:
             bibstem = r.get('bibstem', None)
             names = list()
-            bibcodeList = [c for c in canonicalBibs if b in c]
+            bibcodeList = [c for c in canonicalBibs if bibstem in c]
             bibcodeCount = len(bibcodeList)
             if bibcodeCount > 0:
                 citeSum = sum(cites.get(x, 0) for x in bibcodeList)
