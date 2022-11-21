@@ -184,8 +184,9 @@ def export_to_autocomplete(rows):
                     data.append({'value': bibstem, 'label': names, 'rank': rank})
         if data:
             sorted_data = sorted(data, key=itemgetter('rank'), reverse=True)
-        data = [d.pop('rank', None) for d in sorted_data]
-        result = {'data': data}
+        for d in sorted_data:
+            del d['rank']
+        result = {'data': sorted_data}
         bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
         with open(bib2name_file, 'w') as fo:
             fo.write(json.dumps(result))
