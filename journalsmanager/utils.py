@@ -184,10 +184,14 @@ def export_to_autocomplete(rows):
                     names.append(r.get('transliterated_name', None))
                 if bibstem and names:
                     data.append({'value': bibstem, 'label': names, 'rank': rank})
+        # sort by rank, descending
         if data:
             sorted_data = sorted(data, key=itemgetter('rank'), reverse=True)
+
+        # remove rank entirely, and remove trailing dots from bibstem
         for d in sorted_data:
             del d['rank']
+            d['value'] = d['value'].rstrip('.')
 
         result = {'data': sorted_data}
         bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
