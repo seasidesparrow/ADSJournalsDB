@@ -188,10 +188,16 @@ def export_to_autocomplete(rows):
             sorted_data = sorted(data, key=itemgetter('rank'), reverse=True)
         for d in sorted_data:
             del d['rank']
+
         result = {'data': sorted_data}
         bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
+
+        os.chmod(bib2name_file, 0o666)
         with open(bib2name_file, 'w') as fo:
             fo.write(json.dumps(result))
+        os.chmod(bib2name_file, 0o444)
+        chowner(bib2name_file)
+
     except Exception as err:
         raise AutocompleteExportException("Unable to export autocomplete json: %s" % err)
 
