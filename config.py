@@ -37,6 +37,10 @@ ISSN_JOURNAL_FILE = '/issn2journal'
 # Journal name data for nodejs autocomplete function
 JOURNALS_AUTOCOMPLETE_FILE = '/journals_autocomplete.json'
 
+# Backoffice ranking data files for nodejs autocomplete function
+CANONICAL_BIBS = '/canonical_bibcodes.current'
+CITATION_COUNTS = '/citation.counts'
+
 # REFSOURCE_FILE
 BIB_TO_REFS_FILE = '/citing2file.dat'
 
