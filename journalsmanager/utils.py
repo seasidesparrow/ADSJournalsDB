@@ -175,13 +175,13 @@ def export_to_autocomplete(rows):
                 citeSum = sum(cites.get(x, 0) for x in bibcodeList)
                 rank = bibcodeCount + citeSum
                 if r.get('name', None):
-                    names.append(r.get('name', None))
+                    names.append(r['name'])
                 if r.get('translated_name', None):
-                    names.append(r.get('translated_name', None))
+                    names.append(r['translated_name'])
                 if r.get('native_name', None):
-                    names.append(r.get('native_name', None))
+                    names.append(r['native_name'])
                 if r.get('transliterated_name', None):
-                    names.append(r.get('transliterated_name', None))
+                    names.append(r['transliterated_name'])
                 if bibstem and names:
                     data.append({'value': bibstem, 'label': names, 'rank': rank})
         # sort by rank, descending
