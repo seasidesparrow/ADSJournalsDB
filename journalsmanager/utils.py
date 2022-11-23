@@ -169,7 +169,7 @@ def export_to_autocomplete(rows):
             if len(bibstem) < 5:
                 bibstem = bibstem.ljust(5, '.')
             names = list()
-            bibcodeList = [c for c in canonicalBibs if bibstem in c]
+            bibcodeList = [c for c in canonicalBibs if bibstem == c[4:9]]
             bibcodeCount = len(bibcodeList)
             if bibcodeCount > 0:
                 citeSum = sum(cites.get(x, 0) for x in bibcodeList)
