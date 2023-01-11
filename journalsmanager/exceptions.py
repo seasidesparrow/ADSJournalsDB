@@ -142,3 +142,7 @@ class BackupFileException(Exception):
 
 class FileOwnershipError(Exception):
     pass
+
+
+class LoadCompletenessDataException(Exception)
+    pass
