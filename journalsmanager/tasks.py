@@ -185,9 +185,8 @@ def task_db_load_titlehist(recs):
                                              year_start=r[1],
                                              vol_start=r[2],
                                              vol_end=r[3],
-                                             completeness_details=r[4],
-                                             publisherid=r[5],
-                                             notes=r[6]))
+                                             publisherid=r[4],
+                                             notes=r[5]))
                     session.commit()
                 except Exception as err:
                     logger.debug("Problem loading titlehistory: %s,%s" %
@@ -413,9 +412,9 @@ def task_export_table_data(tablename, results):
                     results = session.query(publisher.publisherid, publisher.pubabbrev, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.pubfullname, publisher.notes).order_by(publisher.publisherid.asc()).all()
 
             elif tablename == 'titlehistory':
-                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','completeness_details','publisherid','successor_masterid','notes'))
+                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','publisherid','successor_masterid','notes'))
                 if not results:
-                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.completeness_details, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
+                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
 
             else:
                 results = []
@@ -736,3 +735,27 @@ def task_abandon_active_checkouts():
                 logger.info("Cancelled checkout editctrl.edit %s" % idno)
     except Exception as err:
         raise AbandonCheckoutsException("Problem cancelling active checkouts: %s" % err)
+
+
+def task_load_completeness_data():
+    try:
+        infile = app.conf.COMPLETENESS_JSON_FILE
+        critc = app.conf.COMPLETENESS_CRIT_VALUE
+        with open(infile, 'r') as fj:
+            completeness_data = json.load(fj)
+    except Exception as err:
+        raise LoadCompletenessDataException("Problem loading completeness data from JSON file: %s" % err)
+    else:
+        for d in completeness_data:
+            fraction = d.get('completeness_fraction', 0)
+            bibstem = d.get('bibstem', None)
+            details = json.dumps(d.get('completeness_details', '{}'))
+            if frac >= critc:
+                try:
+                    with app.session_scope() as session:
+                        result = session.execute(update(master).where(master.bibstem==bibstem).values(completeness_fraction=fraction, completeness_details=details))
+                        session.commit()
+                except Exception as err:
+                    session.rollback()
+                    session.flush()
+                    logger.warn("Can't write completeness data for %s: %s" % (bibstem, err))
