@@ -42,6 +42,12 @@ def get_arguments():
                         action='store_true',
                         help='Load refsources from citing2file.dat')
 
+    parser.add_argument('-lc',
+                        '--load-completeness',
+                        dest='load_completeness',
+                        action='store_true',
+                        help='Load completeness data')
+
     parser.add_argument('-dc',
                         '--dump-classic-files',
                         dest='dump_classic',
@@ -167,7 +173,7 @@ def load_abbreviations(masterdict):
     return
 
 
-def load_completeness(masterdict):
+def load_completeness_old(masterdict):
     '''
     Completeness loads multiple tables: publisher, idents, titlehistory
     '''
@@ -299,7 +305,7 @@ def load_full_database():
         logger.warning("Error loading master table: %s" % err)
     else:
         try:
-            load_completeness(masterdict)
+            load_completeness_old(masterdict)
             load_abbreviations(masterdict)
             load_rasterconfig(masterdict)
             load_refsources(masterdict)
@@ -367,6 +373,12 @@ def main():
                     logger.warning("Error clearing refsource table: %s" % err)
                 else:
                     load_refsources(masterdict)
+
+            elif args.load_completeness:
+                try:
+                    tasks.task_load_completeness_data()
+                except Exception as err:
+                    logger.error("Unable to load completeness data: %s" % err)
 
 
 if __name__ == '__main__':

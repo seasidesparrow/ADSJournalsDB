@@ -47,6 +47,10 @@ BIB_TO_REFS_FILE = '/citing2file.dat'
 # RASTERIZING.xml directory
 RASTER_CONFIG_DIR = '/raster_config/'
 
+# Completeness statistics from completeness_statistics_pipeline
+COMPLETENESS_JSON_FILE = '/completeness_export.json'
+COMPLETENESS_CRIT_VALUE = 0.95
+
 #------------------------------------------------------
 
 '''
