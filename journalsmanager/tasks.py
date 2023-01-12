@@ -38,11 +38,20 @@ TABLES = {'master': master, 'master_hist': master_hist,
           'titlehistory': titlehistory, 'titlehistory_hist': titlehistory_hist,
           'refsource': refsource, 'rastervol': rastervol}
 
-TABLE_UNIQID = {'master': 'masterid', 'names': 'nameid', 'abbrevs': 'abbrevid', 'idents': 'identid', 'publisher': 'publisherid', 'titlehistory': 'titlehistoryid', 'raster': 'rasterid', 'rastervol': 'rvolid'}
+TABLE_UNIQID = {'master': 'masterid', 
+                'names': 'nameid', 
+                'abbrevs': 'abbrevid', 
+                'idents': 'identid', 
+                'publisher': 'publisherid', 
+                'titlehistory': 'titlehistoryid', 
+                'raster': 'rasterid', 
+                'rastervol': 'rvolid'}
 
 proj_home = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
 
-app = app_module.ADSJournalsCelery('journals', proj_home=proj_home, config=globals().get('config', {}), local_config=globals().get('local_config', {}))
+app = app_module.ADSJournalsCelery('journals', proj_home=proj_home, 
+                                   config=globals().get('config', {}),
+                                   local_config=globals().get('local_config', {}))
 logger = app.logger
 
 app.conf.CELERY_QUEUES = (
@@ -92,10 +101,13 @@ def task_db_bibstems_to_master(recs):
                         rtype = reftypes[r[1]]
                     else:
                         rtype = 'na'
-                    session.add(master(bibstem=r[0], journal_name=r[2],
-                                               primary_language='en',
-                                               pubtype=ptype, refereed=rtype,
-                                               defunct=False, not_indexed=False))
+                    session.add(master(bibstem=r[0],
+                                       journal_name=r[2],
+                                       primary_language='en',
+                                       pubtype=ptype,
+                                       refereed=rtype,
+                                       defunct=False,
+                                       not_indexed=False))
                 else:
                     logger.debug("task_db_bibstems_to_master: Bibstem %s already in master", r[0])
             try:
@@ -147,7 +159,7 @@ def task_db_load_abbrevs(recs):
             for r in recs:
                 try:
                     session.add(abbrevs(masterid=r[0],
-                                                      abbreviation=r[1]))
+                                        abbreviation=r[1]))
                     session.commit()
                 except Exception as err:
                     logger.debug("Problem with abbreviation: %s,%s" %
@@ -338,7 +350,7 @@ def task_db_load_refsource(masterid, refsrc):
             try:
                 refsrc = json.dumps(refsrc.toJSON())
                 session.add(refsource(masterid=masterid,
-                                              refsource_list=refsrc))
+                                      refsource_list=refsrc))
                 session.commit()
             except Exception as err:
                 logger.warning("Error adding refsources for %s: %s" %
@@ -355,8 +367,10 @@ def task_db_insert_nonindexed_bibstems(nonindexed_dict):
     with app.session_scope() as session:
         for k, v in nonindexed_dict.items():
             try:
-                session.add(master(bibstem=k, journal_name=v['name'],
-                                   pubtype='Other', refereed='na',
+                session.add(master(bibstem=k,
+                                   journal_name=v['name'],
+                                   pubtype='Other',
+                                   refereed='na',
                                    not_indexed=True))
                 session.commit()
             except Exception as err:
@@ -446,18 +460,31 @@ def task_checkout_table(tablename, results):
             table_record = session.query(editctrl).filter(editctrl.tablename.ilike(tablename), editctrl.editstatus=='active').first()
 
             if table_record:
-                sheet = SpreadsheetManager(creds=app.conf.CREDENTIALS_FILE, token=app.conf.TOKEN_FILE, folderid=app.conf.HOME_FOLDER_ID, editors=app.conf.EDITORS, sheetid=table_record.editfileid)
+                sheet = SpreadsheetManager(creds=app.conf.CREDENTIALS_FILE,
+                                           token=app.conf.TOKEN_FILE,
+                                           folderid=app.conf.HOME_FOLDER_ID,
+                                           editors=app.conf.EDITORS,
+                                           sheetid=table_record.editfileid)
                 logger.debug("Table %s is already checked out: Time: %s, ID: %s" % (tablename, table_record.created, table_record.editfileid))
 
             else:
-                sheet = SpreadsheetManager(creds=app.conf.CREDENTIALS_FILE, token=app.conf.TOKEN_FILE, folderid=app.conf.HOME_FOLDER_ID, editors=app.conf.EDITORS)
-                sheet.create_sheet(title=tablename, folderid=app.conf.HOME_FOLDER_ID)
-                session.add(editctrl(tablename=tablename, editstatus='active', editfileid=sheet.sheetid))
+                sheet = SpreadsheetManager(creds=app.conf.CREDENTIALS_FILE,
+                                           token=app.conf.TOKEN_FILE,
+                                           folderid=app.conf.HOME_FOLDER_ID,
+                                           editors=app.conf.EDITORS)
+                sheet.create_sheet(title=tablename,
+                                   folderid=app.conf.HOME_FOLDER_ID)
+                session.add(editctrl(tablename=tablename,
+                                     editstatus='active',
+                                     editfileid=sheet.sheetid))
                 session.commit()
 
                 try:
                     data = task_export_table_data(tablename, results)
-                    sheet.write_table(sheetid=sheet.sheetid, data=data, tablename=tablename, encoding='utf-8')
+                    sheet.write_table(sheetid=sheet.sheetid,
+                                      data=data,
+                                      tablename=tablename,
+                                      encoding='utf-8')
                 except Exception as err:
                     raise WriteDataToSheetException(err)
             try:
@@ -482,7 +509,11 @@ def task_checkin_table(tablename, masterdict, delete_flag=False):
             table_record = session.query(editctrl).filter(editctrl.tablename.ilike(tablename), editctrl.editstatus=='active').first()
 
             if table_record:
-                sheet = SpreadsheetManager(creds=app.conf.CREDENTIALS_FILE, token=app.conf.TOKEN_FILE, folderid=app.conf.HOME_FOLDER_ID, editors=app.conf.EDITORS, sheetid=table_record.editfileid)
+                sheet = SpreadsheetManager(creds=app.conf.CREDENTIALS_FILE,
+                                           token=app.conf.TOKEN_FILE,
+                                           folderid=app.conf.HOME_FOLDER_ID,
+                                           editors=app.conf.EDITORS,
+                                           sheetid=table_record.editfileid)
                 logger.debug("Table %s is currently checked out: Time: %s, ID: %s" % (tablename, table_record.created, table_record.editfileid))
 
                 data = sheet.fetch_table()
@@ -739,8 +770,8 @@ def task_abandon_active_checkouts():
 
 def task_load_completeness_data():
     try:
-        infile = app.conf.COMPLETENESS_JSON_FILE
-        critc = app.conf.COMPLETENESS_CRIT_VALUE
+        infile = app.conf.get('JDB_DATA_DIR', '/') + app.conf.get('COMPLETENESS_JSON_FILE', '/error.dat')
+        critc = app.conf.get('COMPLETENESS_CRIT_VALUE', 0.95)
         with open(infile, 'r') as fj:
             completeness_data = json.load(fj)
     except Exception as err:
@@ -750,11 +781,17 @@ def task_load_completeness_data():
             fraction = d.get('completeness_fraction', 0)
             bibstem = d.get('bibstem', None)
             details = json.dumps(d.get('completeness_details', '{}'))
-            if frac >= critc:
+            if fraction >= critc:
                 try:
                     with app.session_scope() as session:
-                        result = session.execute(update(master).where(master.bibstem==bibstem).values(completeness_fraction=fraction, completeness_details=details))
-                        session.commit()
+                        q = session.query(master).filter(master.bibstem==bibstem).all()
+                        if len(q) != 1:
+                            logger.warn("Error: There should be exactly one record that matches the bibstem '%s' in master, not %s!" % (bibstem, len(q)))
+                        else:
+                            r = q[0]
+                            setattr(r, 'completeness_fraction', fraction)
+                            setattr(r, 'completeness_details', details)
+                            session.commit()
                 except Exception as err:
                     session.rollback()
                     session.flush()

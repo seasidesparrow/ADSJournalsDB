@@ -144,5 +144,5 @@ class FileOwnershipError(Exception):
     pass
 
 
-class LoadCompletenessDataException(Exception)
+class LoadCompletenessDataException(Exception):
     pass
