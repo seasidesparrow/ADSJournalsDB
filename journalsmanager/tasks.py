@@ -38,18 +38,18 @@ TABLES = {'master': master, 'master_hist': master_hist,
           'titlehistory': titlehistory, 'titlehistory_hist': titlehistory_hist,
           'refsource': refsource, 'rastervol': rastervol}
 
-TABLE_UNIQID = {'master': 'masterid', 
-                'names': 'nameid', 
-                'abbrevs': 'abbrevid', 
-                'idents': 'identid', 
-                'publisher': 'publisherid', 
-                'titlehistory': 'titlehistoryid', 
-                'raster': 'rasterid', 
+TABLE_UNIQID = {'master': 'masterid',
+                'names': 'nameid',
+                'abbrevs': 'abbrevid',
+                'idents': 'identid',
+                'publisher': 'publisherid',
+                'titlehistory': 'titlehistoryid',
+                'raster': 'rasterid',
                 'rastervol': 'rvolid'}
 
 proj_home = os.path.realpath(os.path.join(os.path.dirname(__file__), '../'))
 
-app = app_module.ADSJournalsCelery('journals', proj_home=proj_home, 
+app = app_module.ADSJournalsCelery('journals', proj_home=proj_home,
                                    config=globals().get('config', {}),
                                    local_config=globals().get('local_config', {}))
 logger = app.logger
