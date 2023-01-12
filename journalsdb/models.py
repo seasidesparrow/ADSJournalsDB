@@ -27,6 +27,7 @@ class JournalsMaster(Base):
     refereed = Column(ref_status, nullable=False)
     collection = Column(String, nullable=True)
     completeness_fraction = Column(String, nullable=True)
+    completeness_details = Column(Text)
     notes = Column(Text)
     not_indexed = Column(Boolean, default=False)
     created = Column(UTCDateTime, default=get_date)
@@ -45,6 +46,7 @@ class JournalsMaster(Base):
                 'refereed': self.refereed,
                 'collection': self.collection,
                 'completeness_fraction': self.completeness_fraction,
+                'completeness_details': self.completeness_details,
                 'notes': self.notes,
                 'not_indexed': self.not_indexed}
 
@@ -65,6 +67,7 @@ class JournalsMasterHistory(Base):
     refereed = Column(String)
     collection = Column(String)
     completeness_fraction = Column(String)
+    completeness_details = Column(Text)
     notes = Column(Text)
     not_indexed = Column(Boolean)
     created = Column(UTCDateTime)
@@ -253,7 +256,6 @@ class JournalsTitleHistory(Base):
     year_end = Column(Integer)
     vol_start = Column(String)
     vol_end = Column(String)
-    completeness_details = Column(Text)
     publisherid = Column(Integer, ForeignKey('publisher.publisherid'))
     successor_masterid = Column(Integer)
     notes = Column(Text)
@@ -268,7 +270,6 @@ class JournalsTitleHistory(Base):
                 'year_end': self.year_end,
                 'vol_start': self.vol_start,
                 'vol_end': self.vol_end,
-                'completeness_details': self.completeness_details,
                 'publisherid': self.publisherid,
                 'successor_masterid': self.successor_masterid,
                 'notes': self.notes}
@@ -285,7 +286,6 @@ class JournalsTitleHistoryHistory(Base):
     year_end = Column(Integer)
     vol_start = Column(String)
     vol_end = Column(String)
-    completeness_details = Column(Text)
     publisherid = Column(Integer)
     successor_masterid = Column(Integer)
     notes = Column(Text)

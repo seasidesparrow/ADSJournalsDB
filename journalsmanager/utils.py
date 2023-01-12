@@ -64,7 +64,7 @@ def get_encoding(filename):
 
 def read_bibstems_list():
     data = {}
-    infile = JDB_DATA_DIR + '/bibstems.dat'
+    infile = JDB_DATA_DIR + '/' + config.get('BIBSTEMS_FILE', 'error.file')
     try:
         with open(infile, 'r', encoding=get_encoding(infile)) as f:
             nbibstem = f.readline()
@@ -84,7 +84,7 @@ def read_bibstems_list():
 def export_to_bibstemsdat(rows):
     if rows:
         try:
-            outfile = JDB_DATA_DIR + config.get('BIBSTEMS_FILE', 'error.file')
+            outfile = JDB_DATA_DIR + '/' + config.get('BIBSTEMS_FILE', 'error.file')
             backup_export_file(outfile)
         except Exception as err:
             ExportBibstemsException(err)
@@ -119,8 +119,8 @@ def export_to_bibstemsdat(rows):
 
 
 def export_issns(rows):
-    i2j_file = JDB_DATA_DIR + config.get('ISSN_JOURNAL_FILE', 'error.file')
-    j2i_file = JDB_DATA_DIR + config.get('JOURNAL_ISSN_FILE', 'error.file')
+    i2j_file = JDB_DATA_DIR + '/' + config.get('ISSN_JOURNAL_FILE', 'error.file')
+    j2i_file = JDB_DATA_DIR + '/' + config.get('JOURNAL_ISSN_FILE', 'error.file')
     if rows:
         nrows = str(len(rows))
         try:
@@ -194,7 +194,7 @@ def export_to_autocomplete(rows):
             d['value'] = d['value'].rstrip('.')
 
         result = {'data': sorted_data}
-        bib2name_file = JDB_DATA_DIR + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
+        bib2name_file = JDB_DATA_DIR + '/' + config.get('JOURNALS_AUTOCOMPLETE_FILE', 'error.file')
 
         os.chmod(bib2name_file, 0o666)
         with open(bib2name_file, 'w') as fo:
@@ -254,7 +254,7 @@ def read_issn_files():
 def read_complete_csvs():
     data = {}
     for coll in config.get('COLLECTIONS'):
-        infile = JDB_DATA_DIR + '/completion.' + coll + '.csv'
+        infile = JDB_DATA_DIR + '/' + 'completion.' + coll + '.csv'
         if os.path.exists(infile):
             try:
                 with open(infile, 'r', encoding=get_encoding(infile)) as f:
@@ -512,5 +512,3 @@ def backup_export_file(filepath, maxcount=3):
         raise BackupFileException(err)
 
     return
-
-
