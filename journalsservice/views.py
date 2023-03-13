@@ -167,11 +167,13 @@ class ISSN(Resource):
                 with current_app.session_scope() as session:
                     dat_idents = session.query(JournalsIdentifiers).filter_by(id_value=issn).first()
                     masterid = dat_idents.masterid
+                    id_type = dat_idents.id_type
                     if masterid:
                         dat_master = session.query(JournalsMaster).filter_by(masterid=masterid).first()
                         bibstem = dat_master.bibstem
                         journal_name = dat_master.journal_name
-                        result = {'ISSN': issn,
+                        result = {'ISSN': id_value,
+                                  'ISSN_type': id_type,
                                   'bibstem': bibstem,
                                   'journal_name': journal_name}
             except Exception as err:
