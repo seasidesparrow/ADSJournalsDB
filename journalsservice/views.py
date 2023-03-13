@@ -151,3 +151,30 @@ class Refsource(Resource):
                         'Error Info': 'Unspecified error.  Try again.'}, 500
         return {'refsource': request_json}, 200
 
+
+class ISSN(Resource):
+
+    scopes = []
+    rate_limit = [1000, 60 * 60 * 24]
+    decorators = [advertise('scopes', 'rate_limit')]
+
+    def get(self, issn):
+        result = {}
+        if issn:
+            try:
+                if len(issn) == 8:
+                    issn = issn[0:4] + "-" + issn[4:]
+                with current_app.session_scope() as session:
+                    dat_idents = session.query(JournalsIdentifiers).filter_by(id_value=issn).first()
+                    masterid = dat_idents.masterid
+                    if masterid:
+                        dat_master = session.query(JournalsMaster).filter_by(masterid=masterid).first()
+                        bibstem = dat_master.bibstem
+                        journal_name = dat_master.journal_name
+                        result = {'ISSN': issn,
+                                  'bibstem': bibstem,
+                                  'journal_name': journal_name}
+            except Exception as err:
+                return {'Error': 'Refsource search failed',
+                        'Error Info': 'Unspecified error.  Try again.'}, 500
+        return result, 200
