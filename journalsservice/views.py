@@ -166,10 +166,10 @@ class ISSN(Resource):
                     issn = issn[0:4] + "-" + issn[4:]
                 with current_app.session_scope() as session:
                     dat_idents = session.query(JournalsIdentifiers).filter(and_(JournalsIdentifiers.id_value==issn, JournalsIdentifiers.id_type.like("ISSN%"))).first()
-                    masterid = dat_idents.masterid
-                    id_value = dat_idents.id_value
-                    id_type = dat_idents.id_type
-                    if masterid:
+                    if dat_idents:
+                        masterid = dat_idents.masterid
+                        id_value = dat_idents.id_value
+                        id_type = dat_idents.id_type
                         dat_master = session.query(JournalsMaster).filter_by(masterid=masterid).first()
                         bibstem = dat_master.bibstem
                         journal_name = dat_master.journal_name
