@@ -9,7 +9,7 @@ from dateutil import parser
 from journalsdb.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource, JournalsTitleHistory, JournalsNames
 from journalsservice.adsquery import ADSQuery
 import adsmutils
-from sqlalchemy import or_, like
+from sqlalchemy import or_, and_
 
 def liken(text):
     text_out = re.sub(r'[. ]{1,}', '%', text)
@@ -165,7 +165,7 @@ class ISSN(Resource):
                 if len(issn) == 8:
                     issn = issn[0:4] + "-" + issn[4:]
                 with current_app.session_scope() as session:
-                    dat_idents = session.query(JournalsIdentifiers).filter(idents.id_type.like('ISSN_%'), idents.id_value==issn).first()
+                    dat_idents = session.query(JournalsIdentifiers).filter(and_(JournalsIdentifiers.id_value==issn, JournalsIdentifiers.id_type.like("ISSN%"))).first()
                     masterid = dat_idents.masterid
                     id_value = dat_idents.id_value
                     id_type = dat_idents.id_type
