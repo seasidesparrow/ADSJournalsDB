@@ -58,7 +58,7 @@ class Summary(Resource):
                         return result_json, 200
             except Exception as err:
                 return {'Error': 'Summary search failed',
-                        'Error Info': 'Unspecified error.  Try again.'}, 500
+                        'Error Info': str(err)}, 500
         else:
             result_json = {'summary': {}}
             return result_json, 200
@@ -92,7 +92,7 @@ class Journal(Resource):
                         journal_list.append({"bibstem": dat_master.bibstem, "name": dat_master.journal_name})
             except Exception as err:
                 return {'Error': 'Journal search failed',
-                        'Error Info': 'Unspecified error.  Try again.'}, 500
+                        'Error Info': str(err)}, 500
 
         result_json = {'journal': journal_list}
         return result_json, 200
@@ -119,7 +119,7 @@ class Holdings(Resource):
                       'holdings': holdings}
         except Exception as err:
             return {'Error': 'Holdings search failed',
-                    'Error Info': 'Unspecified error.  Try again.'}, 500
+                    'Error Info': str(err)}, 500
         else:
             return result, 200
 
@@ -148,7 +148,7 @@ class Refsource(Resource):
                         request_json = json.loads(dat_refsource.refsource_list)
             except Exception as err:
                 return {'Error': 'Refsource search failed',
-                        'Error Info': 'Unspecified error.  Try again.'}, 500
+                        'Error Info': str(err)}, 500
         return {'refsource': request_json}, 200
 
 
@@ -178,7 +178,7 @@ class ISSN(Resource):
                                                 'bibstem': bibstem,
                                                 'journal_name': journal_name}}
             except Exception as err:
-                return {'Error': 'Refsource search failed',
+                return {'Error': 'issn search failed',
                         'Error Info': str(err)}, 500
         else:
             request_json = {'issn': {}}
