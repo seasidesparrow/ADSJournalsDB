@@ -159,7 +159,7 @@ class ISSN(Resource):
     decorators = [advertise('scopes', 'rate_limit')]
 
     def get(self, issn):
-        result = {}
+        request_json = {}
         if issn:
             try:
                 if len(issn) == 8:
@@ -173,11 +173,13 @@ class ISSN(Resource):
                         dat_master = session.query(JournalsMaster).filter_by(masterid=masterid).first()
                         bibstem = dat_master.bibstem
                         journal_name = dat_master.journal_name
-                        result = {'ISSN': id_value,
-                                  'ISSN_type': id_type,
-                                  'bibstem': bibstem,
-                                  'journal_name': journal_name}
+                        request_json = {'issn': {'ISSN': id_value,
+                                                'ISSN_type': id_type,
+                                                'bibstem': bibstem,
+                                                'journal_name': journal_name}}
             except Exception as err:
                 return {'Error': 'Refsource search failed',
                         'Error Info': 'Unspecified error.  Try again.'}, 500
-        return result, 200
+        else:
+            request_json = {'issn': {}}
+        return request_json, 200
