@@ -179,7 +179,7 @@ class ISSN(Resource):
                                                 'journal_name': journal_name}}
             except Exception as err:
                 return {'Error': 'Refsource search failed',
-                        'Error Info': 'Unspecified error.  Try again.'}, 500
+                        'Error Info': str(err)}, 500
         else:
             request_json = {'issn': {}}
         return request_json, 200
