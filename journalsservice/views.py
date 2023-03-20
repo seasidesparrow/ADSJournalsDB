@@ -9,7 +9,7 @@ from dateutil import parser
 from journalsdb.models import JournalsMaster, JournalsAbbreviations, JournalsIdentifiers, JournalsPublisher, JournalsRefSource, JournalsTitleHistory, JournalsNames
 from journalsservice.adsquery import ADSQuery
 import adsmutils
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 def liken(text):
     text_out = re.sub(r'[. ]{1,}', '%', text)
@@ -58,7 +58,7 @@ class Summary(Resource):
                         return result_json, 200
             except Exception as err:
                 return {'Error': 'Summary search failed',
-                        'Error Info': 'Unspecified error.  Try again.'}, 500
+                        'Error Info': str(err)}, 500
         else:
             result_json = {'summary': {}}
             return result_json, 200
@@ -92,7 +92,7 @@ class Journal(Resource):
                         journal_list.append({"bibstem": dat_master.bibstem, "name": dat_master.journal_name})
             except Exception as err:
                 return {'Error': 'Journal search failed',
-                        'Error Info': 'Unspecified error.  Try again.'}, 500
+                        'Error Info': str(err)}, 500
 
         result_json = {'journal': journal_list}
         return result_json, 200
@@ -119,7 +119,7 @@ class Holdings(Resource):
                       'holdings': holdings}
         except Exception as err:
             return {'Error': 'Holdings search failed',
-                    'Error Info': 'Unspecified error.  Try again.'}, 500
+                    'Error Info': str(err)}, 500
         else:
             return result, 200
 
@@ -148,6 +148,38 @@ class Refsource(Resource):
                         request_json = json.loads(dat_refsource.refsource_list)
             except Exception as err:
                 return {'Error': 'Refsource search failed',
-                        'Error Info': 'Unspecified error.  Try again.'}, 500
+                        'Error Info': str(err)}, 500
         return {'refsource': request_json}, 200
 
+
+class ISSN(Resource):
+
+    scopes = []
+    rate_limit = [1000, 60 * 60 * 24]
+    decorators = [advertise('scopes', 'rate_limit')]
+
+    def get(self, issn):
+        request_json = {}
+        if issn:
+            try:
+                if len(issn) == 8:
+                    issn = issn[0:4] + "-" + issn[4:]
+                with current_app.session_scope() as session:
+                    dat_idents = session.query(JournalsIdentifiers).filter(and_(JournalsIdentifiers.id_value==issn, JournalsIdentifiers.id_type.like("ISSN%"))).first()
+                    if dat_idents:
+                        masterid = dat_idents.masterid
+                        id_value = dat_idents.id_value
+                        id_type = dat_idents.id_type
+                        dat_master = session.query(JournalsMaster).filter_by(masterid=masterid).first()
+                        bibstem = dat_master.bibstem
+                        journal_name = dat_master.journal_name
+                        request_json = {'issn': {'ISSN': id_value,
+                                                'ISSN_type': id_type,
+                                                'bibstem': bibstem,
+                                                'journal_name': journal_name}}
+            except Exception as err:
+                return {'Error': 'issn search failed',
+                        'Error Info': str(err)}, 500
+        else:
+            request_json = {'issn': {}}
+        return request_json, 200

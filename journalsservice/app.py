@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from werkzeug.serving import run_simple
-from .views import Summary, Journal, Holdings, Refsource
+from .views import Summary, Journal, Holdings, Refsource, ISSN
 from flask_restful import Api
 from flask_discoverer import Discoverer
 from adsmutils import ADSFlask
@@ -24,6 +24,7 @@ def create_app(**config):
     api.add_resource(Journal, '/journal/<string:journalname>')
     api.add_resource(Holdings, '/holdings/<string:bibstem>/<string:volume>')
     api.add_resource(Refsource, '/refsource/<string:bibstem>')
+    api.add_resource(ISSN, '/issn/<string:issn>')
 
     discoverer = Discoverer(app)
 
