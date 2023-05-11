@@ -108,15 +108,24 @@ class Holdings(Resource):
         try:
             q = ADSQuery()
             solr_result = q.search(bibstem, volume)
-            data = solr_result['response']
-            count = data['numFound']
-            volume = data['docs'][0]['volume']
-            bibstem = data['docs'][0]['bibstem'][0]
-            holdings = [{'esources': rec['esources'], 'page': rec['page'][0]} for rec in data['docs']]
-            result = {'bibstem': bibstem,
-                      'volume': volume,
-                      'numFound': count,
-                      'holdings': holdings}
+            data = solr_result.get('response', None)
+            if data:
+                count = data.get('numFound', 0)
+                docs = data.get('docs', [])
+                if docs:
+                    volume = docs[0].get('volume', None)
+                    bibstem = docs[0].get('bibstem', [])
+                    if bibstem:
+                        bibstem = bibstem[0]
+                    holdings = [{'esources': rec.get('esources', None), 'page': rec.get('page', [None])[0]} for rec in docs]
+                    result = {'bibstem': bibstem,
+                              'volume': volume,
+                              'numFound': count,
+                              'holdings': holdings}
+                else:
+                    result = {}
+            else:
+                result = {}
         except Exception as err:
             return {'Error': 'Holdings search failed',
                     'Error Info': str(err)}, 500
