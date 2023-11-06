@@ -176,6 +176,7 @@ class ISSN(Resource):
                 with current_app.session_scope() as session:
                     dat_idents = session.query(JournalsIdentifiers).filter(and_(JournalsIdentifiers.id_value==issn, JournalsIdentifiers.id_type.like("ISSN%"))).first()
                     if dat_idents:
+                        pub_abbrev = None
                         masterid = dat_idents.masterid
                         id_value = dat_idents.id_value
                         id_type = dat_idents.id_type
@@ -191,14 +192,11 @@ class ISSN(Resource):
                                     pub = session.query(JournalsPublisher).filter_by(publisherid=publisherid).first()
                                     pubhist = {'publisher': pub.toJSON()['pubabbrev'], 'title': t}
                                     dat_pubhist.append(pubhist)
-                            pub_abbrev = None
                             for p in dat_pubhist:
                                 if not p.get("title", {}).get("year_end", None):
                                     if p.get("publisher", None):
                                         pub_abbrev = p.get("publisher")
-                                   
-                                    
-                            
+
                         request_json = {'issn': {'ISSN': id_value,
                                                 'ISSN_type': id_type,
                                                 'bibstem': bibstem,
