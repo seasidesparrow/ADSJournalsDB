@@ -176,15 +176,31 @@ class ISSN(Resource):
                 with current_app.session_scope() as session:
                     dat_idents = session.query(JournalsIdentifiers).filter(and_(JournalsIdentifiers.id_value==issn, JournalsIdentifiers.id_type.like("ISSN%"))).first()
                     if dat_idents:
+                        pub_abbrev = None
                         masterid = dat_idents.masterid
                         id_value = dat_idents.id_value
                         id_type = dat_idents.id_type
                         dat_master = session.query(JournalsMaster).filter_by(masterid=masterid).first()
                         bibstem = dat_master.bibstem
                         journal_name = dat_master.journal_name
+                        dat_titlehist = [rec.toJSON() for rec in session.query(JournalsTitleHistory).filter_by(masterid=masterid).all()]
+                        if dat_titlehist:
+                            dat_pubhist = []
+                            for t in dat_titlehist:
+                                publisherid = t.pop('publisherid', None)
+                                if publisherid:
+                                    pub = session.query(JournalsPublisher).filter_by(publisherid=publisherid).first()
+                                    pubhist = {'publisher': pub.toJSON()['pubabbrev'], 'title': t}
+                                    dat_pubhist.append(pubhist)
+                            for p in dat_pubhist:
+                                if not p.get("title", {}).get("year_end", None):
+                                    if p.get("publisher", None):
+                                        pub_abbrev = p.get("publisher")
+
                         request_json = {'issn': {'ISSN': id_value,
                                                 'ISSN_type': id_type,
                                                 'bibstem': bibstem,
+                                                'publisher': pub_abbrev,
                                                 'journal_name': journal_name}}
             except Exception as err:
                 return {'Error': 'issn search failed',
