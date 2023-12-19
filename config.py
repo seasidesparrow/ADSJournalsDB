@@ -23,6 +23,9 @@ JDB_DATA_DIR = '/data_source/'
 # BIBSTEMS has bibstem, R/J/C/etc, and canonical name
 BIBSTEMS_FILE = '/bibstems.dat'
 
+# PUBLISHER has bibstem, publisher abbrev
+BIBSTEM_PUBLISHER_FILE = '/publisher_bibstem.dat'
+ 
 # JOURNAL_ABBREV has bibstem and multiple title abbreviations (e.g.
 # A&A, AA, Astron. & Astrophys.)
 JOURNAL_ABBREV_FILE = '/journals_abbrev.dat'

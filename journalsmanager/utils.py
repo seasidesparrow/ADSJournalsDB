@@ -143,6 +143,21 @@ def export_issns(rows):
         else:
             return "Success: %s rows exported." % nrows
 
+def export_publishers(rows):
+    publisher_file = JDB_DATA_DIR + '/' + config.get('BIBSTEM_PUBLISHER_FILE', 'error.file')
+    if rows:
+        try:
+            if publisher_file:
+                with open(publisher_file, 'w') as fout:
+                    nrows = len(rows)
+                    fout.write('%s\n' % nrows)
+                    for r in rows:
+                        fout.write('%s\t%s\n' % (r['bibstem'], r['publisher']))
+        except Exception as err:
+            raise ExportPublisherException(err)
+        else:
+            return "Success: %s rows exported." % nrows
+
 def export_to_autocomplete(rows):
     data = []
     try:

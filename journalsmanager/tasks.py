@@ -149,6 +149,19 @@ def task_export_classic_files():
         except Exception as err:
             logger.error("Problem exporting ISSNs to files: %s" % err)
 
+    # Publishers
+    with app.session_scope() as session:
+        result = session.query(master.bibstem, titlehistory.publisherid, publisher.pubabbrev).join(master, titlehistory.masterid == master.masterid).join(publisher, titlehistory.publisherid == publisher.publisherid).all()
+        rows = []
+        for r in result:
+            (bibstem, pubid, pubabbrev) = r
+            bibstem = bibstem.ljust(5, '.')
+            rows.append({'bibstem': bibstem, 'publisher': pubabbrev})
+        try:
+            result_publisher = export_publishers(rows)
+        except Exception as err:
+            logger.error("Problem exporting publishers to file: %s" % err)
+
     # return "Bibstems: %s ; ISSNs: %s" % (result_bibstems, result_issn)
 
 

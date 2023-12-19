@@ -132,6 +132,10 @@ class ExportISSNException(Exception):
     pass
 
 
+class ExportPublisherException(Exception):
+    pass
+
+
 class AutocompleteExportException(Exception):
     pass
 
