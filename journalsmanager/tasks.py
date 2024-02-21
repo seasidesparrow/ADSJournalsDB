@@ -701,7 +701,7 @@ def task_update_table(checkin, masterdict):
                 logger.warning('unable to re-export failed rows: %s' % err)
         else:
             if status == 'completed':
-                if tablename == 'master':
+                if tablename == 'master' or tablename == 'idents':
                     try:
                         task_export_classic_files()
                     except Exception as err:
