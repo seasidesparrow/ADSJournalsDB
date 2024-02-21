@@ -37,6 +37,9 @@ NONINDEXED_FILE = '/non_indexed.txt'
 JOURNAL_ISSN_FILE = '/journal_issn'
 ISSN_JOURNAL_FILE = '/issn2journal'
 
+# ISSN-Identifier mapping for ADSManualParser
+ISSN_IDENTIFIER = '/issn_identifiers'
+
 # Journal name data for nodejs autocomplete function
 JOURNALS_AUTOCOMPLETE_FILE = '/journals_autocomplete.json'
 
