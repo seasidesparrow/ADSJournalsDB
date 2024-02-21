@@ -162,6 +162,19 @@ def task_export_classic_files():
         except Exception as err:
             logger.error("Problem exporting publishers to file: %s" % err)
 
+    # ISSNs for IngestParser
+    with app.session_scope() as session:
+        result = session.query(master.bibstem, idents.id_type, idents.id_value).join(master, idents.masterid == master.masterid).all()
+        rows = []
+        for r in result:
+            (bibstem, id_type, id_value) = r
+            if "ISSN" in id_type:
+                rows.append({"bibstem": bibstem, "id_type": id_type, "id_value": id_value})
+        try:
+            result_issn_ident = export_issn_identifiers(rows)
+        except Exception as err:
+            logger.error("Problem exporting issn-identifier mapping to file: %s" % err)
+
     # return "Bibstems: %s ; ISSNs: %s" % (result_bibstems, result_issn)
 
 
