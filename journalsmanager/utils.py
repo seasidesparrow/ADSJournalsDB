@@ -95,12 +95,12 @@ def export_to_bibstemsdat(rows):
                 f.write(' %s\n' % nrows)
                 for r in rows:
                     try:
-                        if r['pubtype'] == 'Conf. Proc.':
-                            out_type = 'C'
-                        elif r['pubtype'] == 'Journal':
-                            if r['refereed'] == 'yes':
-                                out_type = 'R'
-                            else:
+                        if r.get('refereed', None) == 'yes':
+                            out_type = 'R'
+                        else:
+                            if r['pubtype'] == 'Conf. Proc.':
+                                out_type = 'C'
+                            elif r['pubtype'] == 'Journal':
                                 out_type = 'J'
                         out_bibstem = ''
                         if len(r['bibstem']) <= 9 and (r['bibstem'][0] not in ['1','2']):
