@@ -24,6 +24,27 @@ def get_arguments():
 
     parser = argparse.ArgumentParser(description='Command line options.')
 
+    parser.add_argument('-xo',
+                        '--checkout-table',
+                        dest='checkout_table',
+                        action='store',
+                        default=None,
+                        help='Check OUT table TABLE to GSheets')
+
+    parser.add_argument('-xi',
+                        '--checkin-table',
+                        dest='checkin_table',
+                        action='store',
+                        default=None,
+                        help='Check IN table TABLE from GSheets')
+
+    parser.add_argument('-ds',
+                        '--delete-stem',
+                        dest='delete_stem',
+                        action='store',
+                        default=None,
+                        help='Delete a bibstem and ALL related data (USE WITH CAUTION)')
+
     parser.add_argument('-lf',
                         '--load-full',
                         dest='load_full',
@@ -53,20 +74,6 @@ def get_arguments():
                         dest='dump_classic',
                         action='store_true',
                         help='Dump table data to files used for classic')
-
-    parser.add_argument('-xi',
-                        '--checkin-table',
-                        dest='checkin_table',
-                        action='store',
-                        default=None,
-                        help='Check IN table TABLE from GSheets')
-
-    parser.add_argument('-xo',
-                        '--checkout-table',
-                        dest='checkout_table',
-                        action='store',
-                        default=None,
-                        help='Check OUT table TABLE to GSheets')
 
     parser.add_argument('-xd',
                         '--delete-checkin-sheet',
@@ -356,6 +363,22 @@ def main():
                     checkin_table(args.checkin_table, masterdict, args.delete_flag)
                 except Exception as err:
                     logger.warning("Error checking in table %s: %s" % (args.checkin_table, err))
+            elif args.delete_stem:
+                masterid = masterdict.get(args.delete_stem, None)
+                if masterid:
+                    try:
+                        tasks.task_delete_masterid(masterid) 
+                    except Exception as err:
+                        logger.warning("Error deleting bibstem %s: %s" % (args.delete_stem, err))
+                    else:
+                        logger.info("Bibstem '%s' and related data successfully deleted" % args.delete_stem)
+                else:
+                    logger.warning("Bibstem '%s' not found: exact match required for deletion" % args.delete_stem)
+                    for bib in masterdict.keys():
+                        if bib.lower() == args.delete_stem.lower():
+                            logger.warning("Possible matching bibstem: '%s'" % bib)
+                            break
+                        
 
             elif args.load_raster:
                 try:

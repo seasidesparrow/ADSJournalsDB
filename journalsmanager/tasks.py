@@ -822,3 +822,59 @@ def task_load_completeness_data():
                     session.rollback()
                     session.flush()
                     logger.warn("Can't write completeness data for %s: %s" % (bibstem, err))
+
+def task_delete_masterid(masterid):
+    editid = None
+    try:
+        with app.session_scope() as session:
+            qxo = session.query(editctrl).filter(editctrl.editstatus=='active').all()
+            if len(qxo) > 0:
+                checkouts = [getattr(x, "tablename") for x in qxo]
+                raise ActiveCheckoutException("You cannot delete via the command line if any sheets are currently checked out: %s" % (",".join(checkouts)))
+            else:
+                new_status = editctrl(tablename="master",
+                                      editstatus="active",
+                                      editfileid="Command line deletion")
+                session.add(new_status)
+                session.commit()
+                editid = new_status.editid
+
+        for dbname in ['names', 'abbrevs', 'idents', 'raster', 'titlehistory', 'master']:
+            db = TABLES.get(dbname, None)
+            dbhist = TABLES.get(dbname+'_hist', None)
+
+            backup_rows = []
+            delete_rows = []
+            with app.session_scope() as session:
+                q = session.query(db).filter(db.masterid==masterid).all()
+                if len(q) > 0:
+                    for r in q:
+                        data = {}
+                        for k in r.__table__.columns.keys():
+                            data[k] = getattr(r,k)
+                        data['editid'] = editid
+                        backup_rows.append(data)
+                    delete_rows.append(masterid)
+
+            if backup_rows:
+                try:
+                    with app.session_scope() as session:
+                        for row in backup_rows:
+                            data = dbhist()
+                            for k,v in row.items():
+                                setattr(data, k, v)
+                            session.add(data)
+                        session.commit()
+                        for row in delete_rows:
+                            session.query(db).filter(db.masterid==row).delete()
+                        session.commit()
+                except Exception as err:
+                    session.rollback()
+                    session.flush()
+                    raise Exception("Well, what? %s" % err)
+            else:
+                logger.debug("Nothing for table %s" % dbname)
+        task_setstatus(editid, "completed")
+    except Exception as err:
+        task_setstatus(editid, "failed")
+        raise Exception("Failed to delete masterid %s: %s" % (masterid, err))
