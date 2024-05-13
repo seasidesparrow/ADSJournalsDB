@@ -855,6 +855,8 @@ def task_delete_masterid(masterid):
                         data['editid'] = editid
                         backup_rows.append(data)
                     delete_rows.append(masterid)
+            if dbname == 'refsource':
+                backup_rows = []
 
             if backup_rows:
                 try:
