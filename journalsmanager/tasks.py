@@ -855,18 +855,17 @@ def task_delete_masterid(masterid):
                         data['editid'] = editid
                         backup_rows.append(data)
                     delete_rows.append(masterid)
-            if dbname == 'refsource':
-                backup_rows = []
 
             if backup_rows:
                 try:
                     with app.session_scope() as session:
-                        for row in backup_rows:
-                            data = dbhist()
-                            for k,v in row.items():
-                                setattr(data, k, v)
-                            session.add(data)
-                        session.commit()
+                        if dbname != 'refsource':
+                            for row in backup_rows:
+                                data = dbhist()
+                                for k,v in row.items():
+                                    setattr(data, k, v)
+                                session.add(data)
+                            session.commit()
                         for row in delete_rows:
                             session.query(db).filter(db.masterid==row).delete()
                         session.commit()
