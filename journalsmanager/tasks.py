@@ -839,7 +839,7 @@ def task_delete_masterid(masterid):
                 session.commit()
                 editid = new_status.editid
 
-        for dbname in ['names', 'abbrevs', 'idents', 'raster', 'titlehistory', 'master']:
+        for dbname in ['names', 'abbrevs', 'idents', 'raster', 'titlehistory', 'master', 'refsource']:
             db = TABLES.get(dbname, None)
             dbhist = TABLES.get(dbname+'_hist', None)
 
