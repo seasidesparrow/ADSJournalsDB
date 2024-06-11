@@ -830,7 +830,7 @@ def task_delete_masterid(masterid):
             qxo = session.query(editctrl).filter(editctrl.editstatus=='active').all()
             if len(qxo) > 0:
                 checkouts = [getattr(x, "tablename") for x in qxo]
-                raise ActiveCheckoutException("You cannot delete via the command line if any sheets are currently checked out: %s" % (",".join(checkouts)))
+                raise ActiveCheckoutException("Deletion failed because the following tables are checked out: %s" % (",".join(checkouts)))
             else:
                 new_status = editctrl(tablename="master",
                                       editstatus="active",
@@ -839,7 +839,7 @@ def task_delete_masterid(masterid):
                 session.commit()
                 editid = new_status.editid
 
-        for dbname in ['names', 'abbrevs', 'idents', 'raster', 'titlehistory', 'master']:
+        for dbname in ['names', 'abbrevs', 'idents', 'raster', 'titlehistory', 'refsource', 'master']:
             db = TABLES.get(dbname, None)
             dbhist = TABLES.get(dbname+'_hist', None)
 
@@ -859,12 +859,13 @@ def task_delete_masterid(masterid):
             if backup_rows:
                 try:
                     with app.session_scope() as session:
-                        for row in backup_rows:
-                            data = dbhist()
-                            for k,v in row.items():
-                                setattr(data, k, v)
-                            session.add(data)
-                        session.commit()
+                        if dbname != 'refsource':
+                            for row in backup_rows:
+                                data = dbhist()
+                                for k,v in row.items():
+                                    setattr(data, k, v)
+                                session.add(data)
+                            session.commit()
                         for row in delete_rows:
                             session.query(db).filter(db.masterid==row).delete()
                         session.commit()
@@ -876,5 +877,6 @@ def task_delete_masterid(masterid):
                 logger.debug("Nothing for table %s" % dbname)
         task_setstatus(editid, "completed")
     except Exception as err:
-        task_setstatus(editid, "failed")
+        if editid:
+            task_setstatus(editid, "failed")
         raise Exception("Failed to delete masterid %s: %s" % (masterid, err))

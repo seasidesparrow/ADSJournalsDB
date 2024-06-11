@@ -368,6 +368,7 @@ def main():
                 if masterid:
                     try:
                         tasks.task_delete_masterid(masterid) 
+                        tasks.task_export_classic_files()
                     except Exception as err:
                         logger.warning("Error deleting bibstem %s: %s" % (args.delete_stem, err))
                     else:
