@@ -442,9 +442,9 @@ def task_export_table_data(tablename, results):
                     results = session.query(idents.identid, idents.masterid, master.bibstem, idents.id_type, idents.id_value).join(master, idents.masterid == master.masterid).order_by(idents.masterid.asc()).all()
 
             elif tablename == 'abbrevs':
-                csvout.writerow(('abbrevid','masterid','bibstem','abbreviation'))
+                csvout.writerow(('abbrevid','masterid','bibstem','abbreviation','canonical'))
                 if not results:
-                    results = session.query(abbrevs.abbrevid, abbrevs.masterid, master.bibstem, abbrevs.abbreviation).join(master, abbrevs.masterid == master.masterid).order_by(abbrevs.masterid.asc()).all()
+                    results = session.query(abbrevs.abbrevid, abbrevs.masterid, master.bibstem, abbrevs.abbreviation, abbrevs.canonical).join(master, abbrevs.masterid == master.masterid).order_by(abbrevs.masterid.asc()).all()
 
             elif tablename == 'publisher':
                 csvout.writerow(('publisherid','pubabbrev','pubaddress','pubcontact','puburl','pubextid','pubfullname', 'notes'))

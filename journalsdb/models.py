@@ -130,6 +130,7 @@ class JournalsAbbreviations(Base):
     masterid = Column(Integer, ForeignKey('master.masterid'),
                       primary_key=True, nullable=False)
     abbreviation = Column(String)
+    canonical = Column(Boolean, default=False, nullable=False)
     created = Column(UTCDateTime, default=get_date)
     updated = Column(UTCDateTime, onupdate=get_date)
 
@@ -149,6 +150,7 @@ class JournalsAbbreviationsHistory(Base):
     abbrevid = Column(Integer)
     masterid = Column(Integer)
     abbreviation = Column(String)
+    canonical = Column(Boolean)
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
