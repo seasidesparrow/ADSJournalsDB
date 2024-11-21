@@ -243,11 +243,11 @@ class Browse(Resource):
                         request_json = {}
 
                         # master
-                        canonical_name = dat_master.get("journal_name", "")
-                        refereed_status = dat_master.get("refereed", "")
-                        completeness_fraction = dat_master.get("completeness_fraction", "")
-                        classic_bibstem = dat_master.get("bibstem", "")
-                        primary_language = dat_master.get("primary_language", "")
+                        canonical_name = dat_master.toJSON().get("journal_name", "")
+                        refereed_status = dat_master.toJSON().get("refereed", "")
+                        completeness_fraction = dat_master.toJSON().get("completeness_fraction", "")
+                        classic_bibstem = dat_master.toJSON().get("bibstem", "")
+                        primary_language = dat_master.toJSON().get("primary_language", "")
 
                         # abbrevs
                         if dat_abbrev:
