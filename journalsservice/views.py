@@ -280,6 +280,8 @@ class Browse(Resource):
                                         "start_volume": p.get("title", {}).get("vol_start", "")
                                     }
                                 )
+                        else:
+                            pubhist = []
                         request_json = {
                             "browse": {
                                 "canonical_name": canonical_name,
