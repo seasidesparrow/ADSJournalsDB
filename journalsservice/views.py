@@ -230,8 +230,8 @@ class Browse(Resource):
                         dat_idents = [rec.toJSON() for rec in session.query(JournalsIdentifiers).filter_by(masterid=masterid).all()]
                         dat_names = [rec.toJSON() for rec in session.query(JournalsNames).filter_by(masterid=masterid).all()]
                         dat_titlehist = [rec.toJSON() for rec in session.query(JournalsTitleHistory).filter_by(masterid=masterid).all()]
+                        dat_pubhist = [] 
                         if dat_titlehist:
-                            dat_pubhist = [] 
                             for t in dat_titlehist:
                                 publisherid = t.pop('publisherid', None)
                                 if publisherid:
