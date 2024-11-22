@@ -208,3 +208,97 @@ class ISSN(Resource):
         else:
             request_json = {'issn': {}}
         return request_json, 200
+
+class Browse(Resource):
+
+    scopes = []
+    rate_limit = [1000, 60 * 60 * 24]
+    decorators = [advertise('scopes', 'rate_limit')]
+
+    def get(self, bibstem):
+        if bibstem:
+            try:
+                with current_app.session_scope() as session:
+                    dat_master = session.query(JournalsMaster).filter_by(bibstem=bibstem).first()
+                    try:
+                        masterid = dat_master.masterid
+                    except Exception as err:
+                        return {'Error': 'Search failed',
+                                'Error Info': 'Bibstem "%s" not found.' % bibstem}, 200
+                    else:
+                        dat_abbrev = [rec.toJSON()['abbreviation'] for rec in session.query(JournalsAbbreviations).filter_by(masterid=masterid, canonical=True).all()]
+                        dat_idents = [rec.toJSON() for rec in session.query(JournalsIdentifiers).filter_by(masterid=masterid).all()]
+                        dat_names = [rec.toJSON() for rec in session.query(JournalsNames).filter_by(masterid=masterid).all()]
+                        dat_titlehist = [rec.toJSON() for rec in session.query(JournalsTitleHistory).filter_by(masterid=masterid).all()]
+                        dat_pubhist = [] 
+                        if dat_titlehist:
+                            for t in dat_titlehist:
+                                publisherid = t.pop('publisherid', None)
+                                if publisherid:
+                                    pub = session.query(JournalsPublisher).filter_by(publisherid=publisherid).first()
+                                    pubhist = {'publisher': pub.toJSON()['pubabbrev'], 'title': t}
+                                    dat_pubhist.append(pubhist)
+
+                        # browse return data
+                        request_json = {}
+
+                        # master
+                        canonical_name = dat_master.toJSON().get("journal_name", "")
+                        refereed_status = dat_master.toJSON().get("refereed", "")
+                        completeness_fraction = dat_master.toJSON().get("completeness_fraction", "")
+                        classic_bibstem = dat_master.toJSON().get("bibstem", "")
+                        primary_language = dat_master.toJSON().get("primary_language", "")
+
+                        # abbrevs
+                        if dat_abbrev:
+                            canonical_abbreviation = dat_abbrev[0]
+                        else:
+                            canonical_abbreviation = ""
+
+                        # idents
+                        if dat_idents:
+                            identifiers = dat_idents
+                        else:
+                            identifiers = []
+
+                        # names
+                        if dat_names and type(dat_names[0]) == dict:
+                            native_language_title = dat_names[0].get("name_native_language", "")
+                            title_language = dat_names[0].get("title_language", "")
+                        else:
+                            native_language_title = ""
+                            title_language = ""
+
+                        # pubhist
+                        if dat_pubhist:
+                            pubhist = []
+                            for p in dat_pubhist:
+                                pubhist.append(
+                                    {
+                                        "publisher": p.get("publisher", ""), 
+                                        "start_year": p.get("title", {}).get("year_start", ""),
+                                        "start_volume": p.get("title", {}).get("vol_start", "")
+                                    }
+                                )
+                        else:
+                            pubhist = []
+                        request_json = {
+                            "browse": {
+                                "canonical_name": canonical_name,
+                                "classic_bibstem": classic_bibstem,
+                                "canonical_abbreviation": canonical_abbreviation,
+                                "primary_language": primary_language,
+                                "native_language_title": native_language_title,
+                                "title_language": title_language,
+                                "completeness_estimate": completeness_fraction,
+                                "external_identifiers": identifiers,
+                                "publication_history": pubhist
+                            }
+                        }
+                        return request_json, 200
+
+            except Exception as err:
+                return {"Error": "browse search failed",
+                        "Error Info": str(err)}, 500
+        else:
+            return {"browse": {}}, 200
