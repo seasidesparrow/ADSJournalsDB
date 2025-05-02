@@ -109,12 +109,11 @@ class Journal(Resource):
                     for mid in rec_found:
                         dat_master = session.query(JournalsMaster).filter_by(masterid=mid).first()
                         journal_list.append({"bibstem": dat_master.bibstem, "name": dat_master.journal_name, "pubtype": dat_master.pubtype})
-                    if journal_list:
-                        journal_list = sort_journal_list(journal_list)
+                journal_list = sort_journals(journal_list)
             except Exception as err:
                 return {'Error': 'Journal search failed',
                         'Error Info': str(err)}, 500
-        result_json = {'journal': sort_journals(journal_list)}
+        result_json = {'journal': journal_list}
         return result_json, 200
 
 
