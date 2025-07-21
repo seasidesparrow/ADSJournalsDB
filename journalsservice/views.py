@@ -17,6 +17,25 @@ def liken(text):
     text_out = re.sub(r'%{1,}', '%', text_out)
     return text_out
 
+def sort_journals(results):
+    # sort to put journal results at the front of the list
+    try:
+        sorted_journals = []
+        pubtypeOrder = ["Journal","Conf. Proc.","Other"]
+        for pt in pubtypeOrder:
+            for j in results:
+                if j.get("pubtype","") == pt:
+                    sorted_journals.append(j)
+        for j in results:
+            if j.get("pubtype","") not in pubtypeOrder:
+                sorted_journals.append(j)
+        for j in sorted_journals:
+            if j.get("pubtype", None):
+                del j["pubtype"]
+        return sorted_journals
+    except:
+        return results
+
 class Summary(Resource):
 
     scopes = []
@@ -39,6 +58,7 @@ class Summary(Resource):
                         dat_names = [rec.toJSON() for rec in session.query(JournalsNames).filter_by(masterid=masterid).all()]
                         dat_titlehist = [rec.toJSON() for rec in session.query(JournalsTitleHistory).filter_by(masterid=masterid).all()]
                         dat_pubhist = []
+                    
                         if dat_titlehist:
                             for t in dat_titlehist:
                                 publisherid = t.pop('publisherid', None)
@@ -89,11 +109,11 @@ class Journal(Resource):
                     rec_found = list(set(rec_found))
                     for mid in rec_found:
                         dat_master = session.query(JournalsMaster).filter_by(masterid=mid).first()
-                        journal_list.append({"bibstem": dat_master.bibstem, "name": dat_master.journal_name})
+                        journal_list.append({"bibstem": dat_master.bibstem, "name": dat_master.journal_name, "pubtype": dat_master.pubtype})
+                journal_list = sort_journals(journal_list)
             except Exception as err:
                 return {'Error': 'Journal search failed',
                         'Error Info': str(err)}, 500
-
         result_json = {'journal': journal_list}
         return result_json, 200
 
