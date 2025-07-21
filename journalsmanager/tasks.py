@@ -107,7 +107,8 @@ def task_db_bibstems_to_master(recs):
                                        pubtype=ptype,
                                        refereed=rtype,
                                        defunct=False,
-                                       not_indexed=False))
+                                       not_indexed=False,
+                                       deprecated=False))
                 else:
                     logger.debug("task_db_bibstems_to_master: Bibstem %s already in master", r[0])
             try:
@@ -427,9 +428,9 @@ def task_export_table_data(tablename, results):
             data = io.StringIO()
             csvout = csv.writer(data, quoting=csv.QUOTE_NONNUMERIC)
             if tablename == 'master':
-                csvout.writerow(('masterid','bibstem','journal_name','primary_language','multilingual','defunct','pubtype','refereed','collection','completeness_fraction','notes','not_indexed'))
+                csvout.writerow(('masterid','bibstem','journal_name','primary_language','multilingual','defunct','pubtype','refereed','collection','completeness_fraction','notes','not_indexed','deprecated'))
                 if not results:
-                    results = session.query(master.masterid, master.bibstem, master.journal_name, master.primary_language, master.multilingual, master.defunct, master.pubtype, master.refereed, master.collection, master.completeness_fraction, master.notes, master.not_indexed).order_by(master.masterid.asc()).all()
+                    results = session.query(master.masterid, master.bibstem, master.journal_name, master.primary_language, master.multilingual, master.defunct, master.pubtype, master.refereed, master.collection, master.completeness_fraction, master.notes, master.not_indexed, master.deprecated).order_by(master.masterid.asc()).all()
 
             elif tablename == 'names':
                 csvout.writerow(('nameid','masterid','bibstem','name_english_translated','title_language','name_native_language','name_normalized'))
@@ -804,9 +805,13 @@ def task_load_completeness_data():
         raise LoadCompletenessDataException("Problem loading completeness data from JSON file: %s" % err)
     else:
         for d in completeness_data:
-            fraction = d.get('completeness_fraction', 0)
+            fraction = d.get('title_completeness_fraction', 0)
             bibstem = d.get('bibstem', None)
-            details = json.dumps(d.get('completeness_details', '{}'))
+            #details = json.dumps(d.get('completeness_details', '[]'))
+            #volume_year = json.dumps(d.get("volume_by_year", '{}'))
+            details = d.get("completeness_details", [])
+            new_details = json.dumps({"completeness_by_volume": details})
+                      
             if fraction >= critc:
                 try:
                     with app.session_scope() as session:
@@ -816,7 +821,7 @@ def task_load_completeness_data():
                         else:
                             r = q[0]
                             setattr(r, 'completeness_fraction', fraction)
-                            setattr(r, 'completeness_details', details)
+                            setattr(r, 'completeness_details', new_details)
                             session.commit()
                 except Exception as err:
                     session.rollback()

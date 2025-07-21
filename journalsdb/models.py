@@ -2,6 +2,9 @@ try:
     from adsputils import get_date, UTCDateTime
 except ImportError:
     from adsmutils import get_date, UTCDateTime
+
+import json
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (Table, Column, Integer, Numeric, String, TIMESTAMP,
                         ForeignKey, Boolean, Float, Text, UniqueConstraint)
@@ -21,15 +24,16 @@ class JournalsMaster(Base):
     bibstem = Column(String, unique=True, nullable=False)
     journal_name = Column(String, nullable=False)
     primary_language = Column(String, nullable=False, default='en')
-    multilingual = Column(Boolean, default=False)
-    defunct = Column(Boolean, default=False)
+    multilingual = Column(Boolean, nullable=False, default=False)
+    defunct = Column(Boolean, nullable=False, default=False)
     pubtype = Column(pub_type, nullable=False)
     refereed = Column(ref_status, nullable=False)
     collection = Column(String, nullable=True)
     completeness_fraction = Column(String, nullable=True)
     completeness_details = Column(Text)
     notes = Column(Text)
-    not_indexed = Column(Boolean, default=False)
+    not_indexed = Column(Boolean, nullable=False, default=False)
+    deprecated = Column(Boolean, nullable=False, default=False)
     created = Column(UTCDateTime, default=get_date)
     updated = Column(UTCDateTime, onupdate=get_date)
 
@@ -37,6 +41,9 @@ class JournalsMaster(Base):
         return "master.masterid='{self.masterid}'".format(self=self)
 
     def toJSON(self):
+        completeness_details = self.completeness_details
+        if completeness_details:
+            completeness_details = json.loads(completeness_details)
         return {'bibstem': self.bibstem,
                 'journal_name': self.journal_name,
                 'primary_language': self.primary_language,
@@ -46,9 +53,10 @@ class JournalsMaster(Base):
                 'refereed': self.refereed,
                 'collection': self.collection,
                 'completeness_fraction': self.completeness_fraction,
-                'completeness_details': self.completeness_details,
+                'completeness_details': completeness_details,
                 'notes': self.notes,
-                'not_indexed': self.not_indexed}
+                'not_indexed': self.not_indexed,
+                'deprecated': self.deprecated}
 
 
 class JournalsMasterHistory(Base):
@@ -70,6 +78,7 @@ class JournalsMasterHistory(Base):
     completeness_details = Column(Text)
     notes = Column(Text)
     not_indexed = Column(Boolean)
+    deprecated = Column(Boolean)
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
