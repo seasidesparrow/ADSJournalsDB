@@ -142,6 +142,10 @@ class ExportPublisherException(Exception):
     pass
 
 
+class ExportAbbrevException(Exception):
+    pass
+
+
 class AutocompleteExportException(Exception):
     pass
 
