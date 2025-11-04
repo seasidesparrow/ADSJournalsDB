@@ -176,8 +176,17 @@ def task_export_classic_files():
         except Exception as err:
             logger.error("Problem exporting issn-identifier mapping to file: %s" % err)
 
-    # return "Bibstems: %s ; ISSNs: %s" % (result_bibstems, result_issn)
-
+    # Journal Canonical Abbreviations
+    with app.session_scope() as session:
+        result = session.query(master.bibstem, abbrevs.abbreviation).join(master, abbrevs.masterid == master.masterid).filter(abbrevs.canonical == True).order_by(master.bibstem.asc()).all()
+        rows = []
+        for r in result:
+            (bibstem, abbrev) = r
+            rows.append({"bibstem": bibstem, "abbrev": abbrev})
+        try:
+            result_abbrevs = export_abbreviations(rows)
+        except Exception as err:
+            logger.error("Problem exporting journal abbreviations to file: %s" % err)
 
 @app.task(queue='load-datafiles')
 def task_db_load_abbrevs(recs):

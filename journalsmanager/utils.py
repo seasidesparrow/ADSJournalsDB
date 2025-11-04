@@ -173,6 +173,23 @@ def export_issn_identifiers(rows):
         else:
             return "Success: %s rows exported." % nrows
 
+def export_abbreviations(rows):
+    bibstem_abbrev_file = JDB_DATA_DIR + '/' + config.get('BIBSTEM_CANONICAL_ABBREV', 'error.file')
+    if rows and bibstem_abbrev_file:
+        try:
+            backup_export_file(bibstem_abbrev_file)
+            with open(bibstem_abbrev_file, 'w') as fout:
+                nrows = len(rows)
+                fout.write('%s\n' % nrows)
+                for r in rows:
+                    fout.write('%s\t%s\n' % (r.get('bibstem', ''), r.get('abbrev', '')))
+        except Exception as err:
+            raise ExportAbbrevException(err)
+        else:
+            return "Success: %s rows exported." % nrows
+                
+           
+
 def export_to_autocomplete(rows):
     data = []
     try:

@@ -37,6 +37,9 @@ NONINDEXED_FILE = '/non_indexed.txt'
 JOURNAL_ISSN_FILE = '/journal_issn'
 ISSN_JOURNAL_FILE = '/issn2journal'
 
+# Canonical Abbreviation - Bibstem mapping
+BIBSTEM_CANONICAL_ABBREV = '/bibstem_canonical_abbrev.dat'
+
 # ISSN-Identifier mapping for ADSManualParser
 ISSN_IDENTIFIER = '/issn_identifiers'
 
