@@ -336,7 +336,8 @@ def main():
         tasks.task_abandon_active_checkouts()
 
     elif args.checkout_table:
-        checkout_table(args.checkout_table)
+        tablename = args.checkout_table.lower()
+        checkout_table(tablename)
 
     elif args.dump_classic:
         tasks.task_export_classic_files()
@@ -359,10 +360,11 @@ def main():
         else:
 
             if args.checkin_table:
+                tablename = args.checkin_table.lower()
                 try:
-                    checkin_table(args.checkin_table, masterdict, args.delete_flag)
+                    checkin_table(tablename, masterdict, args.delete_flag)
                 except Exception as err:
-                    logger.warning("Error checking in table %s: %s" % (args.checkin_table, err))
+                    logger.warning("Error checking in table %s: %s" % (tablename, err))
             elif args.delete_stem:
                 masterid = masterdict.get(args.delete_stem, None)
                 if masterid:

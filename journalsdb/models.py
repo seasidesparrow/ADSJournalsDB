@@ -268,7 +268,8 @@ class JournalsTitleHistory(Base):
     vol_start = Column(String)
     vol_end = Column(String)
     publisherid = Column(Integer, ForeignKey('publisher.publisherid'))
-    successor_masterid = Column(Integer)
+    successor_bibstems = Column(String)
+    predecessor_bibstems = Column(String)
     notes = Column(Text)
     created = Column(UTCDateTime, default=get_date)
     updated = Column(UTCDateTime, onupdate=get_date)
@@ -282,7 +283,8 @@ class JournalsTitleHistory(Base):
                 'vol_start': self.vol_start,
                 'vol_end': self.vol_end,
                 'publisherid': self.publisherid,
-                'successor_masterid': self.successor_masterid,
+                'successor_bibstems': self.successor_bibstems,
+                'predecessor_bibstems': self.predecessor_bibstems,
                 'notes': self.notes}
 
 class JournalsTitleHistoryHistory(Base):
@@ -298,7 +300,8 @@ class JournalsTitleHistoryHistory(Base):
     vol_start = Column(String)
     vol_end = Column(String)
     publisherid = Column(Integer)
-    successor_masterid = Column(Integer)
+    successor_bibstems = Column(String)
+    predecessor_bibstems = Column(String)
     notes = Column(Text)
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)

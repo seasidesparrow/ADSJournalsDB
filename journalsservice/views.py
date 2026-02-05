@@ -22,16 +22,20 @@ def sort_journals(results):
     try:
         sorted_journals = []
         pubtypeOrder = ["Journal","Conf. Proc.","Other"]
+        reftypeOrder = ["yes","partial","no","na"]
         for pt in pubtypeOrder:
-            for j in results:
-                if j.get("pubtype","") == pt:
-                    sorted_journals.append(j)
+            for rt in reftypeOrder:
+                for j in results:
+                    if j.get("pubtype","") == pt and j.get("refereed","") == rt:
+                        sorted_journals.append(j)
         for j in results:
             if j.get("pubtype","") not in pubtypeOrder:
                 sorted_journals.append(j)
         for j in sorted_journals:
             if j.get("pubtype", None):
                 del j["pubtype"]
+            if j.get("refereed", None):
+                del j["refereed"]
         return sorted_journals
     except:
         return results
@@ -44,6 +48,7 @@ class Summary(Resource):
 
     def get(self, bibstem):
         if bibstem:
+            bibstem = bibstem.rstrip('.')
             try:
                 with current_app.session_scope() as session:
                     dat_master = session.query(JournalsMaster).filter_by(bibstem=bibstem).first()
@@ -65,7 +70,9 @@ class Summary(Resource):
                                 if publisherid:
                                     pub = session.query(JournalsPublisher).filter_by(publisherid=publisherid).first()
                                     pubhist = {'publisher': pub.toJSON()['pubabbrev'], 'title': t}
-                                    dat_pubhist.append(pubhist)
+                                else:
+                                    pubhist = {'publisher': 'n/a', 'title': t}
+                                dat_pubhist.append(pubhist)
                         result_json = {'summary':
                                           {'master': dat_master.toJSON(),
                                            'idents': dat_idents,
@@ -109,7 +116,7 @@ class Journal(Resource):
                     rec_found = list(set(rec_found))
                     for mid in rec_found:
                         dat_master = session.query(JournalsMaster).filter_by(masterid=mid).first()
-                        journal_list.append({"bibstem": dat_master.bibstem, "name": dat_master.journal_name, "pubtype": dat_master.pubtype})
+                        journal_list.append({"bibstem": dat_master.bibstem, "name": dat_master.journal_name, "pubtype": dat_master.pubtype, "refereed": dat_master.refereed})
                 journal_list = sort_journals(journal_list)
             except Exception as err:
                 return {'Error': 'Journal search failed',
@@ -127,6 +134,7 @@ class Holdings(Resource):
     def get(self, bibstem, volume):
         try:
             q = ADSQuery()
+            bibstem = bibstem.rstrip('.')
             solr_result = q.search(bibstem, volume)
             data = solr_result.get('response', None)
             if data:
@@ -162,6 +170,7 @@ class Refsource(Resource):
     def get(self, bibstem):
         request_json = {}
         if bibstem:
+            bibstem = bibstem.rstrip('.')
             try:
                 with current_app.session_scope() as session:
                     try:
@@ -237,6 +246,7 @@ class Browse(Resource):
 
     def get(self, bibstem):
         if bibstem:
+            bibstem = bibstem.rstrip('.')
             try:
                 with current_app.session_scope() as session:
                     dat_master = session.query(JournalsMaster).filter_by(bibstem=bibstem).first()
