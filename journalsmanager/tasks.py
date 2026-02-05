@@ -462,9 +462,9 @@ def task_export_table_data(tablename, results):
                     results = session.query(publisher.publisherid, publisher.pubabbrev, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.pubfullname, publisher.notes).order_by(publisher.publisherid.asc()).all()
 
             elif tablename == 'titlehistory':
-                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','publisherid','successor_masterid','notes'))
+                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','publisherid','successor_bibstems','predecessor_bibstems','notes'))
                 if not results:
-                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.publisherid, titlehistory.successor_masterid, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
+                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.publisherid, titlehistory.successor_bibstems, titlehistory.predecessor_bibstems, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
 
             else:
                 results = []
@@ -816,8 +816,7 @@ def task_load_completeness_data():
         for d in completeness_data:
             fraction = d.get('title_completeness_fraction', 0)
             bibstem = d.get('bibstem', None)
-            #details = json.dumps(d.get('completeness_details', '[]'))
-            #volume_year = json.dumps(d.get("volume_by_year", '{}'))
+            volume_year = json.dumps(d.get("volume_by_year", '{}'))
             details = d.get("completeness_details", [])
             new_details = json.dumps({"completeness_by_volume": details})
                       
@@ -831,6 +830,7 @@ def task_load_completeness_data():
                             r = q[0]
                             setattr(r, 'completeness_fraction', fraction)
                             setattr(r, 'completeness_details', new_details)
+                            setattr(r, 'year', volume_year)
                             session.commit()
                 except Exception as err:
                     session.rollback()

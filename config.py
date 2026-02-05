@@ -57,8 +57,9 @@ BIB_TO_REFS_FILE = '/citing2file.dat'
 RASTER_CONFIG_DIR = '/raster_config/'
 
 # Completeness statistics from completeness_statistics_pipeline
+# If CRIT_VALUE is 0.0, load statistics for all journals
 COMPLETENESS_JSON_FILE = '/completeness_export.json'
-COMPLETENESS_CRIT_VALUE = 0.95
+COMPLETENESS_CRIT_VALUE = 0.0
 
 #------------------------------------------------------
 
