@@ -711,11 +711,10 @@ def task_update_table(checkin, masterdict):
                 logger.warning('unable to re-export failed rows: %s' % err)
         else:
             if status == 'completed':
-                if tablename == 'master' or tablename == 'idents':
-                    try:
-                        task_export_classic_files()
-                    except Exception as err:
-                        raise TableCheckinException("Failed to export bibstems.dat: %s" % err)
+                try:
+                    task_export_classic_files()
+                except Exception as err:
+                    raise TableCheckinException("Failed to export classic files: %s" % err)
 
 
     except Exception as err:
@@ -807,7 +806,7 @@ def task_abandon_active_checkouts():
 def task_load_completeness_data():
     try:
         infile = app.conf.get('JDB_DATA_DIR', '/') + app.conf.get('COMPLETENESS_JSON_FILE', '/error.dat')
-        critc = app.conf.get('COMPLETENESS_CRIT_VALUE', 0.95)
+        critc = app.conf.get('COMPLETENESS_CRIT_VALUE', 0.)
         with open(infile, 'r') as fj:
             completeness_data = json.load(fj)
     except Exception as err:
