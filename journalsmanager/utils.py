@@ -95,6 +95,8 @@ def export_to_bibstemsdat(rows):
                 f.write(' %s\n' % nrows)
                 for r in rows:
                     try:
+                        # default value is 'C'
+                        out_type = 'C'
                         if r.get('refereed', None) == 'yes':
                             out_type = 'R'
                         else:

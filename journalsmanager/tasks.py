@@ -806,7 +806,7 @@ def task_abandon_active_checkouts():
 def task_load_completeness_data():
     try:
         infile = app.conf.get('JDB_DATA_DIR', '/') + app.conf.get('COMPLETENESS_JSON_FILE', '/error.dat')
-        critc = app.conf.get('COMPLETENESS_CRIT_VALUE', 0.)
+        critc = app.conf.get('COMPLETENESS_CRIT_VALUE', 0.0)
         with open(infile, 'r') as fj:
             completeness_data = json.load(fj)
     except Exception as err:
