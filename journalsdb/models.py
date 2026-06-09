@@ -82,6 +82,7 @@ class JournalsMasterHistory(Base):
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
+    deleted = Column(Boolean, default=False)
 
     def __repr__(self):
         return "master_hist.masterid='{self.masterid}'".format(self=self)
@@ -126,6 +127,7 @@ class JournalsNamesHistory(Base):
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
+    deleted = Column(Boolean, default=False)
 
     def __repr__(self):
         return "names_hist.masterid='{self.masterid}'".format(self=self)
@@ -163,6 +165,7 @@ class JournalsAbbreviationsHistory(Base):
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
+    deleted = Column(Boolean, default=False)
 
     def __repr__(self):
         return "abbrevs.abbrevid='{self.abbrevid}'".format(self=self)
@@ -201,6 +204,7 @@ class JournalsIdentifiersHistory(Base):
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
+    deleted = Column(Boolean, default=False)
 
     def __repr__(self):
         return "idents_histidentid='{self.identid}')".format(self=self)
@@ -250,6 +254,7 @@ class JournalsPublisherHistory(Base):
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
+    deleted = Column(Boolean, default=False)
 
     def __repr__(self):
         return "publisher_hist.publisherid='{self.publisherid}'"\
@@ -306,6 +311,7 @@ class JournalsTitleHistoryHistory(Base):
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
+    deleted = Column(Boolean, default=False)
 
     def __repr__(self):
         return "pubhist_hist.pubhistid='{self.pubhistid}')".format(self=self)
@@ -362,6 +368,7 @@ class JournalsRasterHistory(Base):
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
     superseded = Column(UTCDateTime, default=get_date)
+    deleted = Column(Boolean, default=False)
 
     def __repr(self):
         return "raster.rasterid='{self.rasterid}'".format(self=self)
