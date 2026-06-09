@@ -270,6 +270,10 @@ class JournalsTitleHistory(Base):
     publisherid = Column(Integer, ForeignKey('publisher.publisherid'))
     successor_bibstems = Column(String)
     predecessor_bibstems = Column(String)
+    successor_issns = Column(String)
+    predecessor_issns = Column(String)
+    predecessor_codens = Column(String)
+    successor_codens = Column(String)
     notes = Column(Text)
     created = Column(UTCDateTime, default=get_date)
     updated = Column(UTCDateTime, onupdate=get_date)
@@ -285,6 +289,10 @@ class JournalsTitleHistory(Base):
                 'publisherid': self.publisherid,
                 'successor_bibstems': self.successor_bibstems,
                 'predecessor_bibstems': self.predecessor_bibstems,
+                'successor_bibstems': self.successor_issns,
+                'predecessor_bibstems': self.predecessor_issns,
+                'successor_codens': self.successor_codens,
+                'predecessor_codens': self.predecessor_codens,
                 'notes': self.notes}
 
 class JournalsTitleHistoryHistory(Base):
@@ -302,6 +310,10 @@ class JournalsTitleHistoryHistory(Base):
     publisherid = Column(Integer)
     successor_bibstems = Column(String)
     predecessor_bibstems = Column(String)
+    successor_issns = Column(String)
+    predecessor_issns = Column(String)
+    successor_codens = Column(String)
+    predecessor_codens = Column(String)
     notes = Column(Text)
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
