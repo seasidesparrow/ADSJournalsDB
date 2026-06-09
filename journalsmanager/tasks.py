@@ -462,9 +462,9 @@ def task_export_table_data(tablename, results):
                     results = session.query(publisher.publisherid, publisher.pubabbrev, publisher.pubaddress, publisher.pubcontact, publisher.puburl, publisher.pubextid, publisher.pubfullname, publisher.notes).order_by(publisher.publisherid.asc()).all()
 
             elif tablename == 'titlehistory':
-                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','publisherid','successor_bibstems','predecessor_bibstems','notes'))
+                csvout.writerow(('titlehistoryid','masterid','bibstem','year_start','year_end','vol_start','vol_end','publisherid','successor_bibstems','predecessor_bibstems','successor_issns','predecessor_issns','successor_codens','predecessor_codens','notes'))
                 if not results:
-                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.publisherid, titlehistory.successor_bibstems, titlehistory.predecessor_bibstems, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
+                    results = session.query(titlehistory.titlehistoryid, titlehistory.masterid, master.bibstem, titlehistory.year_start, titlehistory.year_end, titlehistory.vol_start, titlehistory.vol_end, titlehistory.publisherid, titlehistory.successor_bibstems, titlehistory.predecessor_bibstems, titlehistory.successor_issns, titlehistory.predecessor_issns, titlehistory.successor_codens, titlehistory.predecessor_codens, titlehistory.notes).join(master, titlehistory.masterid == master.masterid).order_by(titlehistory.masterid.asc()).all()
 
             else:
                 results = []
