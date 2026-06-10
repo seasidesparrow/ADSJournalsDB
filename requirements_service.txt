@@ -1,6 +1,7 @@
-git+https://github.com/adsabs/ADSMicroserviceUtils.git@v1.2.3
+setuptools<56.5.0
+git+https://github.com/adsabs/ADSMicroserviceUtils.git@v1.3.0
 alembic==0.8.9
-itsdangerous==2.0.1
-jinja2==3.0.3
+itsdangerous>=2.1.2
+jinja2>=3.1.2
 psycopg2-binary==2.9.3
-werkzeug==2.0.2
+werkzeug>=2.2.2
